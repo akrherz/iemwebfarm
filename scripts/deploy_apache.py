@@ -34,6 +34,9 @@ def manage(source, target):
     """Do the linking."""
     if os.path.islink(target) or os.path.isfile(target):
         os.unlink(target)
+    if not os.path.isfile(source):
+        print(f"Skip symlink for {source}, file does not exist")
+        return
     os.symlink(source, target)
 
 
