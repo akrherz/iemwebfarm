@@ -44,7 +44,8 @@ def symlinks():
     """Manage the symlinks we set above."""
     for arg in SYMLINKS:
         source = arg[0]
-        target = os.path.basename(source) if len(arg) == 1 else arg[1]
+        fn = os.path.basename(source) if len(arg) == 1 else arg[1]
+        target = f"{APACHECONF}/{fn}"
         manage(source, target)
 
 
