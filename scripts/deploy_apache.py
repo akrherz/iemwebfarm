@@ -33,10 +33,6 @@ SYMLINKS = [
     ["/opt/datateam/config/drainagedata-vhost.conf"],
     # virtual /vendor stuff
     ["/opt/vendor/conf/vendor.conf"],
-    # iemwebfarm handler
-    ["/opt/iemwebfarm/config/iemwebfarm.conf"],
-    # default
-    ["/opt/iemwebfarm/config/000defaultvhost.conf"],
 ]
 
 
