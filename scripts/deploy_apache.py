@@ -111,6 +111,9 @@ def process_templates(environ):
         content = content.format(**environ)
         # Write to final spot
         target = os.path.join(APACHECONF, fn)
+        # could be busted symlinks lying around
+        if os.path.islink(target) or os.path.isfile(target):
+            os.unlink(target)
         with open(target, "w", encoding="utf-8") as fh:
             fh.write(content)
 
