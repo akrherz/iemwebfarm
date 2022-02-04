@@ -25,8 +25,18 @@ SYMLINKS = [
     ["/opt/depbackend/config/apache-vhost.conf", "depbackend.conf"],
     # https://weather.im
     ["/opt/weather.im/config/weather-im-vhost.conf"],
+    # https://sustainablecorn.org
+    ["/opt/sustainablecorn/config/apache-vhost.conf", "sustainablecorn.conf"],
+    # https://iowa.cocorahs.org
+    ["/opt/cocorahs/config/apache-vhost.conf", "cocorahs.conf"],
+    # https://drainagedata.org
+    ["/opt/datateam/config/drainagedata-vhost.conf"],
     # virtual /vendor stuff
     ["/opt/vendor/conf/vendor.conf"],
+    # iemwebfarm handler
+    ["/opt/iemwebfarm/config/iemwebfarm.conf"],
+    # default
+    ["/opt/iemwebfarm/config/000defaultvhost.conf"],
 ]
 
 
