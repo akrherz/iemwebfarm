@@ -11,7 +11,7 @@ THISREPO = "/opt/iemwebfarm"
 SYMLINKS = [
     # https://datateam.agron.iastate.edu
     ["/opt/datateam/config/datateam.inc"],
-    ["/opt/datateam/config/datateam-vhost.conf"],
+    ["/opt/datateam/config/datateam-vhost.conf", "datateam.conf"],
     ["/opt/datateam/config/datateam_secrets.inc"],
     # https://mesonet.agron.iastate.edu
     ["/opt/iem/config/00iem.conf"],
@@ -74,7 +74,7 @@ def compute_environ():
         env["iemwsgi_tc"] = 12
         env["iemwsgi_ap"] = 16
         env["MinSpareThreads"] = env["ThreadsPerChild"] * 32
-        if env["memGB"] > 60:  # Fatter nodes
+        if env["memGB"] > 40:  # Fatter nodes
             env["ServerLimit"] = 128
     elif env["hostname"].startswith("iem"):
         env["iemwsgi_ap"] = 16
