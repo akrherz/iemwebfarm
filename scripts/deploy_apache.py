@@ -76,14 +76,16 @@ def compute_environ():
     env["MinSpareThreads"] = env["ThreadsPerChild"] * 2  # conservative
     env["ServerLimit"] = 96
     env["iemwsgi_tc"] = 1  # Not really used on non-iemws
-    env["iemwsgi_ap"] = 4  # More likely to be used.
+    env["iemwsgi_ap"] = 2  # More likely to be used.
     if env["hostname"].startswith("iemvs"):
         env["iemwsgi_tc"] = 12
         env["iemwsgi_ap"] = 16
         env["MinSpareThreads"] = env["ThreadsPerChild"] * 32
         if env["memGB"] > 40:  # Fatter nodes
             env["ServerLimit"] = 128
-    elif env["hostname"].startswith("iem"):
+    elif env["hostname"].startswith("iem12"):
+        env["iemwsgi_ap"] = 16
+    elif env["hostname"].startswith("iem16"):
         env["iemwsgi_ap"] = 16
     env["MaxRequestWorkers"] = env["ServerLimit"] * env["ThreadsPerChild"]
 
