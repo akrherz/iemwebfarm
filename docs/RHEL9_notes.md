@@ -16,7 +16,7 @@ dnf -y install samba krb5-workstation sssd iptables-nft-services \
  perl-FCGI-Client nrpe nagios-plugins-disk iperf3 libgfortran \
  xorg-x11-server-Xvfb \
  NetworkManager-initscripts-updown keyutils s-nail autofs s-nail \
- liberation-mono-fonts
+ liberation-mono-fonts perl-libwww-perl nagios-plugins-perl
 
 dnf -y erase cockpit-podman cockpit-ws cockpit-system cockpit-bridge
 
@@ -197,6 +197,12 @@ dnf -y module reset php
 dnf -y module enable php:remi-7.4
 dnf -y module enable mod_auth_openidc
 dnf -y install mod_auth_openidc php-fpm httpd mod_ssl
+
+cd /opt
+git clone https://github.com/akrherz/iemwebfarm.git
+cd /etc/httpd/conf.d
+ln -s /opt/iemwebfarm/apache_conf.d/server-status.conf
+
 systemctl enable httpd
 systemctl enable php-fpm
 systemctl start php-fpm
