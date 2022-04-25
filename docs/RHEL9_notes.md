@@ -79,12 +79,12 @@ Where=/lss
 WantedBy=default.target
 EOL
 
-cat >> /etc/cron.d/system-keytab <<EOL
+cat > /etc/cron.d/system-keytab <<EOL
 @reboot root /usr/bin/sleep 20 && /usr/bin/kinit XX\$@IASTATE.EDU -k -t '/etc/krb5.keytab'
 @hourly root /usr/bin/kinit XX\$@IASTATE.EDU -k -t '/etc/krb5.keytab'
 EOL
 
-cat >> /etc/krb5.conf <<EOL
+cat > /etc/krb5.conf <<EOL
 # To opt out of the system crypto-policies configuration of krb5, remove the
 # symlink at /etc/krb5.conf.d/crypto-policies which will not be recreated.
 includedir /etc/krb5.conf.d/
@@ -104,7 +104,7 @@ includedir /etc/krb5.conf.d/
  dns_uri_lookup = false
 EOL
 
-cat >> /etc/samba/smb.conf <<EOL
+cat > /etc/samba/smb.conf <<EOL
 # See smb.conf.example for a more detailed config file or
 # read the smb.conf manpage.
 # Run 'testparm' to verify the config is correct after
@@ -148,7 +148,7 @@ cat >> /etc/samba/smb.conf <<EOL
   directory mask = 0775
 EOL
 
-cat >> /etc/sssd/sssd.conf <<EOL
+cat > /etc/sssd/sssd.conf <<EOL
 [sssd]
 domains = iastate.edu
 config_file_version = 2
