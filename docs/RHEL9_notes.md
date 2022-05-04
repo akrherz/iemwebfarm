@@ -16,7 +16,7 @@ dnf -y install samba krb5-workstation sssd iptables-nft-services \
  perl-FCGI-Client nrpe nagios-plugins-disk iperf3 libgfortran \
  xorg-x11-server-Xvfb \
  NetworkManager-initscripts-updown keyutils s-nail autofs s-nail \
- liberation-mono-fonts perl-libwww-perl nagios-plugins-perl
+ liberation-mono-fonts perl-libwww-perl nagios-plugins-perl chkconfig
 
 dnf -y erase cockpit-podman cockpit-ws cockpit-system cockpit-bridge
 
@@ -196,7 +196,8 @@ dnf -y install https://rpms.remirepo.net/enterprise/remi-release-9.rpm
 dnf -y module reset php
 dnf -y module enable php:remi-7.4
 dnf -y module enable mod_auth_openidc
-dnf -y install mod_auth_openidc php-fpm httpd mod_ssl
+dnf -y install mod_auth_openidc php-fpm httpd mod_ssl mod_fcgid \
+  php-pecl-memcached php-pgsql swig fcgi-devel
 
 cd /opt
 git clone https://github.com/akrherz/iemwebfarm.git
