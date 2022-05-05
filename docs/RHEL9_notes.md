@@ -16,14 +16,20 @@ dnf -y install samba krb5-workstation sssd iptables-nft-services \
  perl-FCGI-Client nrpe nagios-plugins-disk iperf3 libgfortran \
  xorg-x11-server-Xvfb \
  NetworkManager-initscripts-updown keyutils s-nail autofs s-nail \
- liberation-mono-fonts perl-libwww-perl nagios-plugins-perl chkconfig
+ liberation-mono-fonts perl-libwww-perl nagios-plugins-perl chkconfig \
+ libdb-cxx gd
 
-dnf -y erase cockpit-podman cockpit-ws cockpit-system cockpit-bridge
+dnf -y erase cockpit-podman cockpit-ws cockpit-system cockpit-bridge kmod-kvdo
 
 cd /opt
 git clone https://github.com/akrherz/nagios-checks.git
 systemctl enable sysstat
 systemctl start sysstat
+
+cd /etc/nrpe.d
+ln -s /opt/nagios-checks/nrpe.d/allowed.cfg
+systemctl enable nrpe
+systemctl start nrpe
 
 echo 'myhostname = changeme.agron.iastate.edu' >> /etc/postfix/main.cf
 echo 'relayhost = mailhub.iastate.edu' >> /etc/postfix/main.cf
