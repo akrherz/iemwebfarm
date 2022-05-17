@@ -11,11 +11,11 @@ dnf -y install samba krb5-workstation sssd iptables-nft-services \
  oddjob-mkhomedir sysstat cifs-utils git \
  tmux lftp byacc gcc make rpcgen libxml2-devel zlib-devel tcsh postfix \
  compat-libgfortran-48 \
- keepalived dstat NetworkManager-dispatcher-routing-rules keepalived libnsl \
+ keepalived dstat keepalived libnsl \
  nfs-utils xorg-x11-fonts-ISO8859-1-75dpi xorg-x11-fonts-75dpi tmpwatch \
  perl-FCGI-Client nrpe nagios-plugins-disk iperf3 libgfortran \
  xorg-x11-server-Xvfb \
- NetworkManager-initscripts-updown keyutils s-nail autofs s-nail \
+ keyutils s-nail autofs s-nail \
  liberation-mono-fonts perl-libwww-perl nagios-plugins-perl chkconfig \
  libdb-cxx gd
 
