@@ -17,7 +17,7 @@ dnf -y install samba krb5-workstation sssd iptables-nft-services \
  xorg-x11-server-Xvfb \
  keyutils s-nail autofs s-nail \
  liberation-mono-fonts perl-libwww-perl nagios-plugins-perl chkconfig \
- libdb-cxx gd
+ libdb-cxx gd liberation-serif-fonts
 
 dnf -y erase cockpit-podman cockpit-ws cockpit-system cockpit-bridge kmod-kvdo
 
@@ -218,6 +218,7 @@ systemctl start httpd
 mkdir /var/cache/matplotlib
 chown apache:apache /var/cache/matplotlib
 
+# Copy .pgpass to /usr/share/httpd and ensure it is owned by apache
 # edit security.limit_extensions to include .phtml in /etc/php-fpm.d/www.conf
 # add /etc/http/conf.d/server-status.conf
 # add /etc/systemd/system/httpd.service.d/override.conf￼￼￼￼
