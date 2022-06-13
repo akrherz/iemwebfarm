@@ -51,6 +51,8 @@ Things to run on non-ADS joined hosts.
 groupadd -g 232284 iem-friends
 useradd -u 354600 -g 232284 meteor_ldm
 useradd -u 411898 -g 232284 mesonet
+groupadd -g 101 domain-users
+groupmod -U mesonet,meteor_ldm domain-users
 passwd meteor_ldm
 passwd mesonet
 ```
