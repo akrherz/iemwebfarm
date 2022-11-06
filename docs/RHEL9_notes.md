@@ -5,8 +5,13 @@ Things to run on all hosts.
 ```bash
 dnf config-manager --set-enabled crb
 dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+dnf -y install centos-release-kmods
+dnf config-manager --set-enabled centos-kmods-rebuild
+dnf groupinstall -y "Virtualization Host"
+dnf install -y virt-manager
 grubby --update-kernel ALL --args selinux=0
-echo "*.* @mtadmin.agron.iastate.edu" > /etc/rsyslog.d/iem.conf
+echo "*.* @nagios.agron.iastate.edu" > /etc/rsyslog.d/iem.conf
+systemctl restart rsyslog
 dnf -y install samba krb5-workstation sssd iptables-nft-services \
  oddjob-mkhomedir sysstat cifs-utils git \
  tmux lftp byacc gcc make rpcgen libxml2-devel zlib-devel tcsh postfix \
@@ -227,4 +232,5 @@ chown apache:apache /var/cache/matplotlib
 # set /etc/httpd/conf.modules.d/10-wsgi-python3.conf WSGIApplicationGroup %{GLOBAL} and
 # use conda mod_wsgi
 # update <directory /> setting in httpd.conf
+# /mesonet/data/gis
 ```
