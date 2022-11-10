@@ -16,13 +16,20 @@ def logic(counts, family):
     for addr, hits in counts.items():
         if len(hits) < THRESHOLD or addr == '127.0.0.1':
             continue
+        # Swallow non-naughty things.
+        dq = 0
+        for hit in hits:
+            if hit[2].startswith("/archive/data/") and hit[3] is not None:
+                dq += 1
+        do_block = (len(hits) - dq) >= THRESHOLD
         # NOTE the insert to the front of the chain
         cmd = f"/usr/sbin/{exe} -I INPUT -s {addr} -j DROP"
-        print(f"{addr} with {len(hits)}/{THRESHOLD} 404s\n{cmd}\nSample 10\n")
+        print(f"{addr} with {len(hits)}[{dq} DQ]/{THRESHOLD} 404s\n{cmd}\n")
         for hit in hits[:10]:
             print(f"{hit[0]} uri:|{hit[2]}| ref:|{hit[3]}|")
         print()
-        subprocess.call(cmd, shell=True)
+        if do_block:
+            subprocess.call(cmd, shell=True)
 
 
 def main(argv):
