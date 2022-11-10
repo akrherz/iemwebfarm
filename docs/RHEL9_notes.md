@@ -174,6 +174,7 @@ offline_credentials_expiration = 0
 [domain/iastate.edu]
 ad_gpo_access_control = disabled
 ad_domain = iastate.edu
+dyndns_update = False
 krb5_realm = IASTATE.EDU
 realmd_tags = manages-system joined-with-samba 
 cache_credentials = True
