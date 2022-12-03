@@ -19,7 +19,7 @@ def logic(counts, family):
         # Swallow non-naughty things.
         dq = 0
         for hit in hits:
-            if hit[2].startswith("/archive/data/") and hit[3] is not None:
+            if hit[2].startswith("/archive/data/"):
                 dq += 1
         do_block = (len(hits) - dq) >= THRESHOLD
         # NOTE the insert to the front of the chain
