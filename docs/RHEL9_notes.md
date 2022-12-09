@@ -226,6 +226,8 @@ systemctl start httpd
 mkdir /var/cache/matplotlib
 chown apache:apache /var/cache/matplotlib
 
+ln -s /mnt/idep2/2 /i
+
 # Copy .pgpass to /usr/share/httpd and ensure it is owned by apache
 # edit security.limit_extensions to include .phtml in /etc/php-fpm.d/www.conf
 # add /etc/http/conf.d/server-status.conf
