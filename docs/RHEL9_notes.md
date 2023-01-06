@@ -211,7 +211,8 @@ dnf -y module reset php
 dnf -y module enable php:remi-7.4
 dnf -y module enable mod_auth_openidc
 dnf -y install mod_auth_openidc php-fpm httpd mod_ssl mod_fcgid \
-  php-pecl-memcached php-pgsql swig fcgi-devel php-gd php-mbstring
+  php-pecl-memcached php-pgsql swig fcgi-devel php-gd php-mbstring \
+  php-dbase
 
 cd /opt
 git clone https://github.com/akrherz/iemwebfarm.git
