@@ -2,12 +2,16 @@
 
 Run every minute, sigh.
 """
-import sys
+import re
 import subprocess
+import sys
 
 import psycopg2
 
 THRESHOLD = 30
+MOSAIC_RE = re.compile(
+    r"/archive/data/[0-9]{4}/[0-9]{2}/[0-9]{2}/GIS/uscomp/n0[rq]_[0-9]{12}.png"
+)
 
 
 def logic(counts, family):
@@ -18,9 +22,16 @@ def logic(counts, family):
             continue
         # Swallow non-naughty things.
         dq = 0
+        ignored = 0
         for hit in hits:
+            # Swallow this as it is noisy
+            if MOSAIC_RE.match(hit[2]):
+                ignored += 1
+                continue
             if hit[2].startswith("/archive/data/"):
                 dq += 1
+        if ignored == len(hits):
+            continue
         do_block = (len(hits) - dq) >= THRESHOLD
         # NOTE the insert to the front of the chain
         cmd = f"/usr/sbin/{exe} -I INPUT -s {addr} -j DROP"
