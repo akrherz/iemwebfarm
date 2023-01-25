@@ -72,18 +72,18 @@ dnf -y install rdma-core
 cat >> /etc/systemd/system/lss.mount <<EOL
 [Unit]
 Description=Mount LSS
-After=network.target multi-user.target
 [Mount]
 What=//las-dfs-01.las.iastate.edu/lss/
 Where=/lss
 Type=cifs
 Options=_netdev,noauto,sec=krb5,multiuser,nounix,noserverino,file_mode=0700,dir_mode=0700,vers=3.0
+[Install]
+WantedBy=default.target
 EOL
 
 cat >> /etc/systemd/system/lss.automount <<EOL
 [Unit]
 Description=Automount LSS
-After=network.target multi-user.target
 [Automount]
 Where=/lss
 [Install]
