@@ -78,8 +78,6 @@ What=//las-dfs-01.las.iastate.edu/lss/
 Where=/lss
 Type=cifs
 Options=_netdev,noauto,sec=krb5,multiuser,nounix,noserverino,file_mode=0700,dir_mode=0700,vers=3.0
-[Install]
-WantedBy=default.target
 EOL
 
 cat >> /etc/systemd/system/lss.automount <<EOL
