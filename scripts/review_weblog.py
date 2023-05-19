@@ -10,7 +10,8 @@ import psycopg2
 
 THRESHOLD = 30
 MOSAIC_RE = re.compile(
-    r"/archive/data/[0-9]{4}/[0-9]{2}/[0-9]{2}/GIS/uscomp/n0[rq]_[0-9]{12}.png"
+    r"/archive/data/[0-9]{4}/[0-9]{2}/[0-9]{2}/"
+    r"GIS/uscomp/n0[rq]_[0-9]{12}.(png|wld)"
 )
 
 
