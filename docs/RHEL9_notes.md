@@ -10,7 +10,7 @@ dnf config-manager --set-enabled centos-kmods-rebuild
 dnf groupinstall -y "Virtualization Host"
 dnf install -y virt-manager
 grubby --update-kernel ALL --args selinux=0
-echo "*.* @nagios.agron.iastate.edu" > /etc/rsyslog.d/iem.conf
+echo "*.* @10.90.12.31" > /etc/rsyslog.d/iem.conf
 systemctl restart rsyslog
 dnf -y install samba krb5-workstation sssd iptables-nft-services \
  oddjob-mkhomedir sysstat cifs-utils git \
@@ -206,7 +206,7 @@ Stuff needed for hosts running websites.
 ```bash
 dnf -y install https://rpms.remirepo.net/enterprise/remi-release-9.rpm
 dnf -y module reset php
-dnf -y module enable php:remi-7.4
+dnf -y module enable php:remi-8.2
 dnf -y module enable mod_auth_openidc
 dnf -y install mod_auth_openidc php-fpm httpd mod_ssl mod_fcgid \
   php-pecl-memcached php-pgsql swig fcgi-devel php-gd php-mbstring \
