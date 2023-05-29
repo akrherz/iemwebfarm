@@ -1,8 +1,8 @@
 """Our custom 404 handler."""
 import sys
 
-from pyiem.util import get_dbconn
 from pyiem.templates.iem import TEMPLATE
+from pyiem.util import get_dbconn
 
 IEM_VHOSTS = [
     "mesonet.agron.iastate.edu",
