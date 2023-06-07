@@ -10,8 +10,7 @@ import psycopg2
 
 def main(argv):
     """Go Main Go."""
-    family = int(argv[1])  # either 4 or 6
-    myname = argv[2]
+    myname = argv[1]
     pgconn = psycopg2.connect(
         database="mesosite",
         host="iemdb-mesosite.local",
@@ -21,8 +20,8 @@ def main(argv):
     cursor = pgconn.cursor()
     cursor.execute(
         "SELECT ctid, protocol, client_addr from weblog_block_queue WHERE "
-        "protocol = %s and target = %s",
-        (family, myname),
+        "target = %s",
+        (myname, ),
     )
     for row in cursor:
         exe = "iptables" if row[1] == 4 else "ip6tables"
