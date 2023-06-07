@@ -18,6 +18,7 @@ MOSAIC_RE = re.compile(
 def logic(counts, family):
     """Should we or should we not, that is the question."""
     exe = "iptables" if family == 4 else "ip6tables"
+    res = []
     for addr, hits in counts.items():
         if len(hits) < THRESHOLD or addr == '127.0.0.1':
             continue
@@ -42,6 +43,8 @@ def logic(counts, family):
         print()
         if do_block:
             subprocess.call(cmd, shell=True)
+            res.append(addr)
+    return res
 
 
 def main(argv):
@@ -73,9 +76,15 @@ def main(argv):
         "DELETE from weblog where valid <= %s and family(client_addr) = %s",
         (valid, family),
     )
+    for ip in logic(counts, family):
+        for i in range(35, 45):
+            cursor.execute(
+                "INSERT into weblog_block_queue "
+                "(protocol, client_addr, target) VALUES(%s, %s, %s)",
+                (family, ip, f"iemvs{i}-dc")
+            )
     cursor.close()
     pgconn.commit()
-    logic(counts, family)
 
 
 if __name__ == "__main__":
