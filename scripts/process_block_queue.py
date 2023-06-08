@@ -2,14 +2,19 @@
 
 Run every minute, sigh.
 """
+import random
 import subprocess
 import sys
+import time
 
 import psycopg2
 
 
 def main(argv):
     """Go Main Go."""
+    # Sleep some to allow the cron job that inserts jobs to run and not DOS
+    # database from nodes all connecting at once.
+    time.sleep(random.randint(10, 30))
     myname = argv[1]
     pgconn = psycopg2.connect(
         database="mesosite",
