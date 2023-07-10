@@ -70,7 +70,7 @@ def compute_environ():
     env["hostname"] = socket.gethostname()
     # Get system memory in GB
     env["memGB"] = (
-        os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES') / (1024**3)
+        os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") / (1024**3)
     )
     env["ThreadsPerChild"] = 64  # No need to modify?
     env["MinSpareThreads"] = env["ThreadsPerChild"] * 2  # conservative
@@ -103,7 +103,7 @@ def process_templates(environ):
     """For each template, we load and then replace."""
     for fn in os.listdir(f"{THISREPO}/apache_templates.d"):
         source = os.path.join(THISREPO, "apache_templates.d", fn)
-        with open(source, 'r', encoding="utf-8") as fh:
+        with open(source, "r", encoding="utf-8") as fh:
             content = fh.read()
         # Do replacements
         content = content.format(**environ)

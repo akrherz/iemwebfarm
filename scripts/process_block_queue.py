@@ -12,9 +12,8 @@ import psycopg2
 
 def main(argv):
     """Go Main Go."""
-    # Sleep some to allow the cron job that inserts jobs to run and not DOS
-    # database from nodes all connecting at once.
-    time.sleep(random.randint(10, 30))
+    # Sleep some to prevent a DOS
+    time.sleep(random.randint(1, 10))
     myname = argv[1]
     pgconn = psycopg2.connect(
         database="mesosite",
@@ -26,7 +25,7 @@ def main(argv):
     cursor.execute(
         "SELECT ctid, protocol, client_addr from weblog_block_queue WHERE "
         "target = %s",
-        (myname, ),
+        (myname,),
     )
     for row in cursor:
         exe = "iptables" if row[1] == 4 else "ip6tables"
@@ -42,8 +41,7 @@ def main(argv):
         subprocess.call(cmd)
         cursor2 = pgconn.cursor()
         cursor2.execute(
-            "DELETE from weblog_block_queue where ctid = %s",
-            (row[0], )
+            "DELETE from weblog_block_queue where ctid = %s", (row[0],)
         )
         cursor2.close()
         pgconn.commit()

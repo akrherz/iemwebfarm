@@ -21,7 +21,7 @@ def logic(counts, family):
     exe = "iptables" if family == 4 else "ip6tables"
     res = []
     for addr, hits in counts.items():
-        if len(hits) < THRESHOLD or addr == '127.0.0.1':
+        if len(hits) < THRESHOLD or addr == "127.0.0.1":
             continue
         if ISU_RE.match(addr) is not None:
             print(f"DQ {addr}")
@@ -85,7 +85,7 @@ def main(argv):
             cursor.execute(
                 "INSERT into weblog_block_queue "
                 "(protocol, client_addr, target) VALUES(%s, %s, %s)",
-                (family, ip, f"iemvs{i}-dc")
+                (family, ip, f"iemvs{i}-dc"),
             )
     cursor.close()
     pgconn.commit()
