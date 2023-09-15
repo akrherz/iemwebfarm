@@ -2,7 +2,7 @@
 import sys
 
 from pyiem.templates.iem import TEMPLATE
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconnc
 
 IEM_VHOSTS = [
     "mesonet.agron.iastate.edu",
@@ -22,8 +22,7 @@ def log_request(uri, environ):
         f"404 {uri} remote: {environ.get('REMOTE_ADDR')} "
         f"referer: {environ.get('HTTP_REFERER')}\n"
     )
-    pgconn = get_dbconn("mesosite")
-    cursor = pgconn.cursor()
+    pgconn, cursor = get_dbconnc("mesosite")
     cursor.execute(
         "INSERT into weblog(client_addr, uri, referer, http_status) "
         "VALUES (%s, %s, %s, %s)",
@@ -36,6 +35,7 @@ def log_request(uri, environ):
     )
     cursor.close()
     pgconn.commit()
+    pgconn.close()
 
 
 def application(environ, start_response):
