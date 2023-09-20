@@ -59,7 +59,7 @@ def main(argv):
         host="iemdb-mesosite.local",
         user="nobody",
         connect_timeout=5,
-        # gssencmode="disable",
+        gssencmode="disable",
     )
     cursor = pgconn.cursor()
     cursor.execute(
