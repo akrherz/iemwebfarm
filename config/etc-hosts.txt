@@ -1,0 +1,91 @@
+###
+# NOTE: This is specific to systems in Durham
+#
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+
+127.0.0.1 iem.local
+127.0.0.1 iem-backend.local
+127.0.0.1 datateam.local
+127.0.0.1 dailyerosion.local
+127.0.0.1 depbackend.local
+
+###
+# Entries in ISU DNS that point to frontends we have no routing to
+# VIP between iemvs35-dc and iemvs44-dc
+10.90.12.48 mesonet.agron.iastate.edu
+# Backended on anticyclone
+10.90.12.3 mtarchive.geol.iastate.edu
+
+###
+# Things redundantly defined within DNS
+10.90.12.31 nagios
+# runs with special 10 MB size and 8 GB memory size
+10.90.12.14    iem-memcached
+# arritt <-> metvm4-dc
+10.90.12.45    iem-memcached1
+# metvm4-dc <-> metvm33-dc
+10.90.12.46    iem-memcached2
+# metvm33-dc <-> arritt
+10.90.12.47    iem-memcached3
+
+##############################################################################
+# Database stuff
+
+### iemdb PostgreSQL
+# iemdb1 metvm33-dc
+10.90.12.21 iemdb1.local
+10.90.12.21 iemdb-afos.local
+10.90.12.21 iemdb-asos1min.local
+10.90.12.21 iemdb-coop.local
+10.90.12.21 iemdb-frost.local
+10.90.12.21 iemdb-id3b.local
+10.90.12.21 iemdb-idep.local
+10.90.12.21 iemdb-isuag.local
+10.90.12.21 iemdb-kcci.local
+10.90.12.21 iemdb-mattermost.local
+10.90.12.21 iemdb-mesonet.local
+10.90.12.21 iemdb-mesosite.local
+10.90.12.21 iemdb-mos iemdb-mos.local
+10.90.12.21 iemdb-nc1018.local
+10.90.12.21 iemdb-nwx.local
+10.90.12.21 iemdb-other.local
+10.90.12.21 iemdb-portfolio.local
+10.90.12.21 iemdb-rtstats.local
+10.90.12.21 iemdb-rwis.local
+10.90.12.21 iemdb-scan.local
+10.90.12.21 iemdb-squaw.local
+10.90.12.21 iemdb-sustainablecorn.local
+10.90.12.21 iemdb-td.local
+10.90.12.21 iemdb-wepp.local
+
+### iemdb2 PostgreSQL
+# iemdb2 metvm4-dc
+10.90.12.22 iemdb2.local
+10.90.12.22 iemdb-hads iemdb-hads.local
+10.90.12.22 iemdb-talltowers.local
+10.90.12.22 iemdb-iemre.local
+10.90.12.22 iemdb-smos.local
+10.90.12.22 iemdb-raob.local
+10.90.12.22 iemdb-nldn.local
+10.90.12.22 iemdb-radar.local
+10.90.12.22 iemdb-postgis.local
+
+### iemdb3 PostgreSQL
+# iemdb3 metvm2-dc
+10.90.12.23 iemdb3.local
+10.90.12.23 iemdb-asos.local
+10.90.12.23 iemdb-awos.local
+10.90.12.23 iemdb-hml.local
+10.90.12.23 iemdb-iem.local
+10.90.12.23 iemdb-openfire.local
+10.90.12.23 iemdb-snet.local
+
+##############################################################################
+
+# mesonet-pyvbcam (iem12)
+10.24.19.228 pyvbcam.local
+# iem11-dc
+10.90.12.30 iembot
+# metvm6-dc and iemvm6(via iem8-dc)
+10.90.12.49  iem-archive.local
