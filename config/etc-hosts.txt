@@ -57,6 +57,7 @@
 10.90.12.21 iemdb-squaw.local
 10.90.12.21 iemdb-sustainablecorn.local
 10.90.12.21 iemdb-td.local
+10.90.12.21 iemdb-uscrn.local
 10.90.12.21 iemdb-wepp.local
 
 ### iemdb2 PostgreSQL
