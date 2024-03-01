@@ -1,4 +1,5 @@
 """Our custom 404 handler."""
+
 import sys
 
 from pyiem.templates.iem import TEMPLATE

@@ -188,7 +188,7 @@ timeout = 120
 EOL
 chmod 600 /etc/sssd/sssd.conf
 
-net ads join --no-dns-updates -U akrherz
+net ads join --no-dns-updates -U akrherz --service-name=cifs
 
 systemctl enable sssd
 systemctl restart sssd

@@ -5,6 +5,7 @@ Daily for a week
 Monthly for 6 months.
 
 """
+
 import datetime
 import subprocess
 import sys
