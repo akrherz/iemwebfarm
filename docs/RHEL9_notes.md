@@ -188,7 +188,7 @@ timeout = 120
 EOL
 chmod 600 /etc/sssd/sssd.conf
 
-net ads join --no-dns-updates -U akrherz --service-name=cifs
+adcli join -D iastate.edu -U akrherz --service-name=cifs --service-name=nfs
 
 systemctl enable sssd
 systemctl restart sssd
