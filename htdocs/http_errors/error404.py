@@ -1,9 +1,12 @@
 """Our custom 404 handler."""
 
+import re
 import sys
+from datetime import datetime, timezone
 
+from pyiem.database import get_dbconnc
 from pyiem.templates.iem import TEMPLATE
-from pyiem.util import get_dbconnc
+from pyiem.util import utc
 
 IEM_VHOSTS = [
     "mesonet.agron.iastate.edu",
@@ -15,6 +18,7 @@ IEM_VHOSTS = [
     "mesonet4.agron.iastate.edu",
 ]
 COWIMG = "https://mesonet.agron.iastate.edu/images/cow404.jpg"
+ARCHIVE_RE = re.compile("^/archive/data/(\d{4})/(\d{2})/(\d{2})/(.*)_(\d{12})")
 
 
 def log_request(uri, environ):
@@ -48,6 +52,21 @@ def application(environ, start_response):
     if uri.startswith("/onsite/windrose/climate"):
         start_response("410 Gone", [("Content-type", "text/plain")])
         return [b"Resource is no longer available."]
+
+    # People requesting files from the future
+    m = ARCHIVE_RE.match(uri)
+    if m:
+        ts = datetime.strptime(m.group(5), "%Y%m%d%H%M").replace(
+            tzinfo=timezone.utc
+        )
+        if ts > utc():
+            start_response(
+                "422 Unprocessable entity", [("Content-type", "text/plain")]
+            )
+            return [
+                b"Please adjust your script to not request files "
+                b"from the future."
+            ]
 
     # We should re-assert the HTTP status code that brought us here :/
     start_response("404 Not Found", [("Content-type", "text/html")])
