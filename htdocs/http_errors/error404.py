@@ -2,11 +2,11 @@
 
 import re
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from pyiem.database import get_dbconnc
 from pyiem.templates.iem import TEMPLATE
-from pyiem.util import utc
+from pyiem.util import LOG, utc
 
 IEM_VHOSTS = [
     "mesonet.agron.iastate.edu",
@@ -18,7 +18,9 @@ IEM_VHOSTS = [
     "mesonet4.agron.iastate.edu",
 ]
 COWIMG = "https://mesonet.agron.iastate.edu/images/cow404.jpg"
-ARCHIVE_RE = re.compile("^/archive/data/(\d{4})/(\d{2})/(\d{2})/(.*)_(\d{12})")
+ARCHIVE_RE = re.compile(
+    "^/archive/data/(\d{4})/(\d{2})/(\d{2})/(.*)_(\d{8})_?(\d{2,4})"
+)
 
 
 def log_request(uri, environ):
@@ -56,9 +58,13 @@ def application(environ, start_response):
     # People requesting files from the future
     m = ARCHIVE_RE.match(uri)
     if m:
-        ts = datetime.strptime(m.group(5), "%Y%m%d%H%M").replace(
-            tzinfo=timezone.utc
-        )
+        try:
+            tstr = m.group(5) + m.group(6)
+            fmt = "%Y%m%d%H%M" if len(tstr) == 12 else "%Y%m%d%H"
+            ts = datetime.strptime(tstr, fmt).replace(tzinfo=timezone.utc)
+        except Exception as exp:
+            LOG.error(exp)
+            ts = utc() - timedelta(days=1)
         if ts > utc():
             start_response(
                 "422 Unprocessable entity", [("Content-type", "text/plain")]
