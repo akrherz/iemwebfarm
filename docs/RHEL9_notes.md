@@ -22,7 +22,7 @@ dnf -y install samba krb5-workstation sssd iptables-nft-services \
  xorg-x11-server-Xvfb \
  keyutils s-nail autofs s-nail \
  liberation-mono-fonts perl-libwww-perl nagios-plugins-perl chkconfig \
- libdb-cxx gd liberation-serif-fonts gifsicle ImageMagick perl
+ libdb-cxx gd liberation-serif-fonts gifsicle ImageMagick perl tesseract
 
 dnf -y erase cockpit-podman cockpit-ws cockpit-system cockpit-bridge kmod-kvdo
 
