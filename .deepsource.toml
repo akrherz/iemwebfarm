@@ -6,6 +6,9 @@ exclude_patterns = [
 ]
 
 [[analyzers]]
+name = "shell"
+
+[[analyzers]]
 name = "python"
 
   [analyzers.meta]
