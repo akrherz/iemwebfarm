@@ -8,6 +8,8 @@ export PKG_CONFIG_LIBDIR=$PREFIX/lib
 # Note, mapserver-sample.conf goes to /etc/opt/ per 
 # https://cmake.org/cmake/help/latest/module/GNUInstallDirs.html
 cmake .. \
+-DBUILD_FUZZER_REPRODUCER=OFF \
+-DBUILD_TESTING=OFF \
 -DMAPSERVER_CONFIG_FILE=$PREFIX/etc/mapserver.conf \
 -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX \
 -DWITH_CLIENT_WFS=1 \
@@ -17,6 +19,7 @@ cmake .. \
 -DWITH_PYTHON=1 \
 -DWITH_PROTOBUFC=0 \
 -DWITH_FRIBIDI=1 \
+-DWITH_FCGI=1 \
 -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX \
 -DPNG_LIBRARY=$PREFIX/lib/libpng.so \
 -DPNG_INCLUDE_DIR=$PREFIX/include \
