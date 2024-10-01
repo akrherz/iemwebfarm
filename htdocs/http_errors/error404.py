@@ -26,8 +26,13 @@ ARCHIVE_RE = re.compile(
 def log_request(uri, environ):
     """Do some logging work."""
     snipped = f"{uri[:100]}...snipped" if len(uri) > 100 else uri
+    remoteip_full = environ.get("X-Forwarded-For", environ.get("REMOTE_ADDR"))
+    remoteip = remoteip_full
+    if remoteip_full.find(",") > 0:
+        # Eh
+        remoteip = remoteip.split(",")[0]
     sys.stderr.write(
-        f"404 {snipped} remote: {environ.get('REMOTE_ADDR')} "
+        f"404 {snipped} remote: {remoteip_full} "
         f"referer: {environ.get('HTTP_REFERER')}\n"
     )
     pgconn, cursor = get_dbconnc("mesosite")
@@ -35,7 +40,7 @@ def log_request(uri, environ):
         "INSERT into weblog(client_addr, uri, referer, http_status) "
         "VALUES (%s, %s, %s, %s)",
         (
-            environ.get("REMOTE_ADDR"),
+            remoteip,
             uri,
             environ.get("HTTP_REFERER"),
             404,
