@@ -26,7 +26,10 @@ ARCHIVE_RE = re.compile(
 def log_request(uri, environ):
     """Do some logging work."""
     snipped = f"{uri[:100]}...snipped" if len(uri) > 100 else uri
-    remoteip_full = environ.get("X-Forwarded-For", environ.get("REMOTE_ADDR"))
+    # See mod_wsgi discussion on this
+    remoteip_full = environ.get(
+        "HTTP_X_FORWARDED_FOR", environ.get("REMOTE_ADDR")
+    )
     remoteip = remoteip_full
     if remoteip_full.find(",") > 0:
         # Eh
