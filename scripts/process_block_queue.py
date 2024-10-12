@@ -31,9 +31,11 @@ def main(argv):
     )
     updated = False
     for row in cursor:
+        # We need to escape the periods
+        xff = row[1].replace(".", r"\.")
         updated = True
         with open("/etc/httpd/conf.d/blocklist", "a") as fh:
-            fh.write(f"SetEnvIf X-Forwarded-For ^{row[1]}$ BlockAccess\n")
+            fh.write(f'SetEnvIf X-Forwarded-For "^{xff}$" BlockAccess\n')
         cursor2 = pgconn.cursor()
         cursor2.execute(
             "DELETE from weblog_block_queue where ctid = %s", (row[0],)
