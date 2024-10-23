@@ -7,6 +7,7 @@ import random
 import subprocess
 import sys
 import time
+from datetime import datetime, timezone
 
 import psycopg2
 
@@ -34,8 +35,11 @@ def main(argv):
         # We need to escape the periods
         xff = row[1].replace(".", r"\.")
         updated = True
+        ss = f"# {datetime.now(timezone.utc).isoformat()}"
         with open("/etc/httpd/conf.d/blocklist", "a") as fh:
-            fh.write(f'SetEnvIf X-Forwarded-For "^{xff}$" BlockAccess\n')
+            fh.write(
+                f'SetEnvIf X-Forwarded-For "^{xff}$" BlockAccess=1  {ss}\n'
+            )
         cursor2 = pgconn.cursor()
         cursor2.execute(
             "DELETE from weblog_block_queue where ctid = %s", (row[0],)
