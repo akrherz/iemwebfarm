@@ -83,6 +83,12 @@ def main():
                 "(x_forwarded_for, target) VALUES(%s, %s)",
                 (ip, f"iemvs{i}-dc"),
             )
+        if ip.find(",") == -1:
+            cursor.execute(
+                "INSERT into weblog_block_queue "
+                "(client_addr, target) VALUES(%s, %s)",
+                (ip, "anticyclone"),
+            )
     cursor.close()
     pgconn.commit()
 
