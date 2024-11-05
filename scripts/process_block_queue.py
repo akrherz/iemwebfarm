@@ -9,7 +9,7 @@ import sys
 import time
 from datetime import datetime, timezone
 
-import psycopg2
+import psycopg
 
 
 def main(argv):
@@ -17,8 +17,8 @@ def main(argv):
     # Sleep some to prevent a DOS
     time.sleep(random.randint(1, 10))
     myname = argv[1]
-    pgconn = psycopg2.connect(
-        database="mesosite",
+    pgconn = psycopg.connect(
+        dbname="mesosite",
         host="iemdb-mesosite.local",
         user="nobody",
         connect_timeout=5,
@@ -30,24 +30,28 @@ def main(argv):
         "target = %s",
         (myname,),
     )
-    updated = False
+    newlines = []
     for row in cursor:
         # We need to escape the periods
         xff = row[1].replace(".", r"\.")
-        updated = True
         ss = f"# {datetime.now(timezone.utc).isoformat()}"
-        with open("/etc/httpd/conf.d/blocklist", "a") as fh:
-            fh.write(
-                f'SetEnvIf X-Forwarded-For "^{xff}$" BlockAccess=1  {ss}\n'
-            )
+        newlines.append(
+            f'SetEnvIf X-Forwarded-For "^{xff}$" BlockAccess=1  {ss}\n'
+        )
         cursor2 = pgconn.cursor()
         cursor2.execute(
             "DELETE from weblog_block_queue where ctid = %s", (row[0],)
         )
         cursor2.close()
         pgconn.commit()
-    if updated:
-        subprocess.call(["systemctl", "reload", "httpd"])
+    if not newlines:
+        return
+    with open("/etc/httpd/conf.d/blocklist") as fh:
+        lines = fh.readlines()
+    lines.extend(newlines)
+    with open("/etc/httpd/conf.d/blocklist", "w") as fh:
+        fh.write("".join(lines[-100:]))
+    subprocess.call(["systemctl", "reload", "httpd"])
 
 
 if __name__ == "__main__":
