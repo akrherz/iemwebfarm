@@ -23,7 +23,6 @@ for repo in ["iem", "depbackend"]:
 from pyiem.plot.use_agg import plt  # noqa
 from pyiem.util import LOG  # noqa
 import pandas as pd  # noqa
-import cartopy  # noqa
 
 
 # https://stackoverflow.com/questions/22373927/get-traceback-of-warnings
@@ -48,7 +47,3 @@ if os.path.exists("/etc/IEMDEV"):
     warnings.simplefilter("always", category=ResourceWarning)
 else:
     warnings.filterwarnings("ignore", category=UserWarning)
-
-
-if cartopy.config.get("pre_existing_data_dir", "") == "":
-    cartopy.config["pre_existing_data_dir"] = f"{envpath}/share/cartopy"
