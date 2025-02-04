@@ -14,9 +14,11 @@ os.environ["PROJ_NETWORK"] = "off"
 os.environ["MPLCONFIGDIR"] = "/var/cache/matplotlib"
 os.environ["CARTOPY_OFFLINE_SHARED"] = f"{envpath}/share/cartopy"
 
-# Have our local pylib module as the first place to look
-if "/opt/iem/pylib" not in sys.path:
-    sys.path.insert(0, "/opt/iem/pylib")
+# Add webfarm repos that have their own pylib to the path
+for repo in ["iem", "depbackend"]:
+    repodir = f"/opt/{repo}/pylib"
+    if repodir not in sys.path and os.path.isdir(repodir):
+        sys.path.insert(0, repodir)
 
 from pyiem.plot.use_agg import plt  # noqa
 from pyiem.util import LOG  # noqa
