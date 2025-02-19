@@ -15,7 +15,7 @@ os.environ["MPLCONFIGDIR"] = "/var/cache/matplotlib"
 os.environ["CARTOPY_OFFLINE_SHARED"] = f"{envpath}/share/cartopy"
 
 # Add webfarm repos that have their own pylib to the path
-for repo in ["iem", "depbackend"]:
+for repo in ["iem", "depbackend", "datateam"]:
     repodir = f"/opt/{repo}/pylib"
     if repodir not in sys.path and os.path.isdir(repodir):
         sys.path.insert(0, repodir)
