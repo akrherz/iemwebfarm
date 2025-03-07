@@ -40,7 +40,7 @@ def logic(counts):
         # NOTE the insert to the front of the chain
         print(f"{addr} with {len(hits)}[{dq} DQ]/{THRESHOLD} 404s\n")
         for hit in hits[:10]:
-            print(f"{hit[0]} uri:|{hit[2]}| ref:|{hit[3]}|")
+            print(f"{hit[0]} uri:|{hit[2]}| ref:|{hit[3]}| dom:|{hit[4]}|")
         print()
         if do_block:
             res.append(addr)
@@ -58,8 +58,8 @@ def main():
     )
     cursor = pgconn.cursor()
     cursor.execute(
-        "SELECT valid, x_forwarded_for, uri, referer from weblog WHERE "
-        "http_status = 404 ORDER by valid ASC",
+        "SELECT valid, x_forwarded_for, uri, referer, domain from weblog "
+        "WHERE http_status = 404 ORDER by valid ASC",
     )
     valid = None
     counts = {}
