@@ -19,7 +19,7 @@ def logic(counts):
     """Should we or should we not, that is the question."""
     res = []
     for addr, hits in counts.items():
-        if len(hits) < THRESHOLD or addr == "127.0.0.1":
+        if len(hits) < THRESHOLD or addr.startswith("127.0.0.1"):
             continue
         if ISU_RE.match(addr) is not None:
             print(f"DQ {addr}")
