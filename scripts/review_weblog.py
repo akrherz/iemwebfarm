@@ -37,7 +37,6 @@ def logic(counts):
         if ignored == len(hits):
             continue
         do_block = (len(hits) - dq) >= THRESHOLD
-        # NOTE the insert to the front of the chain
         print(f"{addr} with {len(hits)}[{dq} DQ]/{THRESHOLD} 404s\n")
         for hit in hits[:10]:
             print(f"{hit[0]} uri:|{hit[2]}| ref:|{hit[3]}| dom:|{hit[4]}|")
@@ -57,8 +56,10 @@ def main():
         gssencmode="disable",
     )
     cursor = pgconn.cursor()
+    # Anticyclone is not behind a proxy, so we have to do tricks here :/
     cursor.execute(
-        "SELECT valid, x_forwarded_for, uri, referer, domain from weblog "
+        "SELECT valid, coalesce(x_forwarded_for, client_addr), uri, referer, "
+        "domain from weblog "
         "WHERE http_status = 404 ORDER by valid ASC",
     )
     valid = None
@@ -83,12 +84,13 @@ def main():
                 "(x_forwarded_for, target) VALUES(%s, %s)",
                 (ip, f"iemvs{i}-dc"),
             )
-        if ip.find(",") == -1:
-            cursor.execute(
-                "INSERT into weblog_block_queue "
-                "(client_addr, target) VALUES(%s, %s)",
-                (ip, "anticyclone"),
-            )
+        if ip.find(",") > -1:
+            ip = ip.split(",")[-1].strip()
+        cursor.execute(
+            "INSERT into weblog_block_queue "
+            "(client_addr, target) VALUES(%s, %s)",
+            (ip, "anticyclone"),
+        )
     cursor.close()
     pgconn.commit()
 
