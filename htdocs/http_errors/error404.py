@@ -41,13 +41,14 @@ def log_request(uri, environ):
     pgconn, cursor = get_dbconnc("mesosite")
     cursor.execute(
         "INSERT into weblog(client_addr, uri, referer, http_status, "
-        "x_forwarded_for) VALUES (%s, %s, %s, %s, %s)",
+        "x_forwarded_for, domain) VALUES (%s, %s, %s, %s, %s, %s)",
         (
             remoteip,
             uri,
             environ.get("HTTP_REFERER"),
             404,
             environ.get("HTTP_X_FORWARDED_FOR"),
+            environ.get("HTTP_HOST"),
         ),
     )
     cursor.close()
