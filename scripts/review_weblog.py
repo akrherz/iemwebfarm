@@ -58,8 +58,8 @@ def main():
     cursor = pgconn.cursor()
     # Anticyclone is not behind a proxy, so we have to do tricks here :/
     cursor.execute(
-        "SELECT valid, coalesce(x_forwarded_for, client_addr), uri, referer, "
-        "domain from weblog "
+        "SELECT valid, coalesce(x_forwarded_for, client_addr::text), uri, "
+        "referer, domain from weblog "
         "WHERE http_status = 404 ORDER by valid ASC",
     )
     valid = None
