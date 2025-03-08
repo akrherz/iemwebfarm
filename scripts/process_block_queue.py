@@ -33,7 +33,7 @@ def main(argv):
     newlines = []
     for row in cursor:
         # We need to escape the periods
-        xff = row[1].replace(".", r"\.")
+        xff = row[1].replace(".", r"\.").split("/")[0]
         ss = f"# {datetime.now(timezone.utc).isoformat()}"
         newlines.append(
             f'SetEnvIf X-Forwarded-For "^{xff}$" BlockAccess=1  {ss}\n'
