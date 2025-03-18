@@ -66,6 +66,9 @@
 10.90.12.22 iemdb-hads iemdb-hads.local
 10.90.12.22 iemdb-talltowers.local
 10.90.12.22 iemdb-iemre.local
+10.90.12.22 iemdb-iemre_china.local
+10.90.12.22 iemdb-iemre_europe.local
+10.90.12.22 iemdb-iemre_sa.local
 10.90.12.22 iemdb-smos.local
 10.90.12.22 iemdb-raob.local
 10.90.12.22 iemdb-nldn.local
