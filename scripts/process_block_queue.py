@@ -50,7 +50,7 @@ def main(argv):
         lines = fh.readlines()
     lines.extend(newlines)
     with open("/etc/httpd/conf.d/blocklist", "w") as fh:
-        fh.write("".join(lines[-1000:]))
+        fh.write("".join(lines[-100:]))
     subprocess.call(["systemctl", "reload", "httpd"])
 
 
