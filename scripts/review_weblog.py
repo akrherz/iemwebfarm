@@ -4,6 +4,7 @@ Run every minute, sigh.
 """
 
 import re
+from io import StringIO
 
 import psycopg2
 
@@ -27,6 +28,7 @@ def logic(counts):
         # Swallow non-naughty things.
         dq = 0
         ignored = 0
+        msg = StringIO()
         for hit in hits:
             # Swallow this as it is noisy
             if MOSAIC_RE.match(hit[2]):
@@ -37,10 +39,15 @@ def logic(counts):
         if ignored == len(hits):
             continue
         do_block = (len(hits) - dq) >= THRESHOLD
-        print(f"{addr} with {len(hits)}[{dq} DQ]/{THRESHOLD} 404s\n")
+        msg.write(f"{addr} with {len(hits)}[{dq} DQ]/{THRESHOLD} 404s\n\n")
         for hit in hits[:10]:
-            print(f"{hit[0]} uri:|{hit[2]}| ref:|{hit[3]}| dom:|{hit[4]}|")
-        print()
+            msg.write(
+                f"{hit[0]} uri:|{hit[2]}| ref:|{hit[3]}| dom:|{hit[4]}|\n"
+            )
+        payload = msg.getvalue()
+        # Too noisy
+        if payload.find("scnr_engine") == -1:
+            print(payload)
         if do_block:
             res.append(addr)
     return res
