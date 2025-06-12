@@ -21,6 +21,7 @@ COWIMG = "https://mesonet.agron.iastate.edu/images/cow404.jpg"
 ARCHIVE_RE = re.compile(
     "^/archive/data/(\d{4})/(\d{2})/(\d{2})/(.*)_(\d{8})_?(\d{2,4})"
 )
+WMS_RE = re.compile("WMS", re.IGNORECASE)
 
 
 def log_request(uri, environ):
@@ -84,6 +85,14 @@ def application(environ, start_response):
                 b"Please adjust your script to not request files "
                 b"from the future."
             ]
+
+    # Bad WMS requests
+    if WMS_RE.search(uri):
+        start_response("400 Bad Request", [("Content-type", "text/plain")])
+        return [
+            b"This WMS url is invalid. "
+            b"See https://mesonet.agron.iastate.edu/ogc/"
+        ]
 
     # We should re-assert the HTTP status code that brought us here :/
     start_response("404 Not Found", [("Content-type", "text/html")])
