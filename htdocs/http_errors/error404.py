@@ -4,9 +4,10 @@ import re
 import sys
 from datetime import datetime, timedelta, timezone
 
-from pyiem.database import get_dbconnc
+from pyiem.database import sql_helper, with_sqlalchemy_conn
 from pyiem.templates.iem import TEMPLATE
 from pyiem.util import LOG, utc
+from sqlalchemy.engine import Connection
 
 IEM_VHOSTS = [
     "mesonet.agron.iastate.edu",
@@ -21,9 +22,11 @@ COWIMG = "https://mesonet.agron.iastate.edu/images/cow404.jpg"
 ARCHIVE_RE = re.compile(
     "^/archive/data/(\d{4})/(\d{2})/(\d{2})/(.*)_(\d{8})_?(\d{2,4})"
 )
+WMS_RE = re.compile("WMS", re.IGNORECASE)
 
 
-def log_request(uri, environ):
+@with_sqlalchemy_conn("mesosite")
+def log_request(uri: str, environ: dict, conn: Connection | None = None):
     """Do some logging work."""
     snipped = f"{uri[:100]}...snipped" if len(uri) > 100 else uri
     # See mod_wsgi discussion on this
@@ -38,22 +41,22 @@ def log_request(uri, environ):
         f"404 {snipped} remote: {remoteip_full} "
         f"referer: {environ.get('HTTP_REFERER')}\n"
     )
-    pgconn, cursor = get_dbconnc("mesosite")
-    cursor.execute(
-        "INSERT into weblog(client_addr, uri, referer, http_status, "
-        "x_forwarded_for, domain) VALUES (%s, %s, %s, %s, %s, %s)",
-        (
-            remoteip,
-            uri,
-            environ.get("HTTP_REFERER"),
-            404,
-            environ.get("HTTP_X_FORWARDED_FOR"),
-            environ.get("HTTP_HOST"),
+    conn.execute(
+        sql_helper(
+            "INSERT into weblog(client_addr, uri, referer, http_status, "
+            "x_forwarded_for, domain) VALUES (:addr, :url, :ref, :status, "
+            ":xf, :domain)"
         ),
+        {
+            "addr": remoteip,
+            "url": uri,
+            "ref": environ.get("HTTP_REFERER"),
+            "status": 404,
+            "xf": environ.get("HTTP_X_FORWARDED_FOR"),
+            "domain": environ.get("HTTP_HOST"),
+        },
     )
-    cursor.close()
-    pgconn.commit()
-    pgconn.close()
+    conn.commit()
 
 
 def application(environ, start_response):
@@ -84,6 +87,14 @@ def application(environ, start_response):
                 b"Please adjust your script to not request files "
                 b"from the future."
             ]
+
+    # Bad WMS requests
+    if WMS_RE.search(uri):
+        start_response("400 Bad Request", [("Content-type", "text/plain")])
+        return [
+            b"This WMS url is invalid. "
+            b"See https://mesonet.agron.iastate.edu/ogc/"
+        ]
 
     # We should re-assert the HTTP status code that brought us here :/
     start_response("404 Not Found", [("Content-type", "text/html")])
