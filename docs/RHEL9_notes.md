@@ -1,12 +1,10 @@
-# RHEL/Centos Stream 9 Setup Notes
+# Alma Linux 9.6 Setup Notes
 
 Things to run on all hosts.
 
 ```bash
 dnf config-manager --set-enabled crb
 dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
-dnf -y install centos-release-kmods
-dnf config-manager --set-enabled centos-kmods-rebuild
 dnf groupinstall -y "Virtualization Host"
 dnf install -y virt-manager
 grubby --update-kernel ALL --args selinux=0
@@ -206,7 +204,7 @@ Stuff needed for hosts running websites.
 ```bash
 dnf -y install https://rpms.remirepo.net/enterprise/remi-release-9.rpm
 dnf -y module reset php
-dnf -y module enable php:remi-8.2
+dnf -y module enable php:remi-8.4
 dnf -y module enable mod_auth_openidc
 dnf -y install mod_auth_openidc php php-fpm httpd mod_ssl mod_fcgid \
   php-pecl-memcached php-pgsql swig fcgi-devel php-gd php-mbstring \
