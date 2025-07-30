@@ -20,7 +20,7 @@ IEM_VHOSTS = [
 ]
 COWIMG = "https://mesonet.agron.iastate.edu/images/cow404.jpg"
 ARCHIVE_RE = re.compile(
-    "^/archive/data/(\d{4})/(\d{2})/(\d{2})/(.*)_(\d{8})_?(\d{2,4})"
+    r"^/archive/data/(\d{4})/(\d{2})/(\d{2})/(.*)_(\d{8})_?(\d{2,4})"
 )
 WMS_RE = re.compile("WMS", re.IGNORECASE)
 
