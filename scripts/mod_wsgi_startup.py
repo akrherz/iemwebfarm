@@ -20,7 +20,8 @@ for repo in ["iem", "depbackend"]:
     if repodir not in sys.path and os.path.isdir(repodir):
         sys.path.insert(0, repodir)
 
-from pyiem.plot.use_agg import plt  # noqa
+# Forces Agg backend usage
+from pyiem.plot.use_agg import figure  # noqa
 from pyiem.util import LOG  # noqa
 import pandas as pd  # noqa
 
