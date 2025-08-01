@@ -41,6 +41,9 @@ def logic(counts):
         do_block = (len(hits) - dq) >= THRESHOLD
         msg.write(f"{addr} with {len(hits)}[{dq} DQ]/{THRESHOLD} 404s\n\n")
         for hit in hits[:10]:
+            # Short circuit things
+            if hit[5] == 405:
+                msg.write(" scnr_engine\n")
             msg.write(
                 f"{hit[0]} uri:|{hit[2]}| ref:|{hit[3]}| dom:|{hit[4]}|\n"
             )
@@ -66,8 +69,8 @@ def main():
     # Anticyclone is not behind a proxy, so we have to do tricks here :/
     cursor.execute(
         "SELECT valid, coalesce(x_forwarded_for, client_addr::text), uri, "
-        "referer, domain from weblog "
-        "WHERE http_status = 404 ORDER by valid ASC",
+        "referer, domain, http_status from weblog "
+        "WHERE http_status in (404, 405) ORDER by valid ASC",
     )
     valid = None
     counts = {}

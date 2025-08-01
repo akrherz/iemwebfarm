@@ -26,7 +26,12 @@ WMS_RE = re.compile("WMS", re.IGNORECASE)
 
 
 @with_sqlalchemy_conn("mesosite")
-def log_request(uri: str, environ: dict, conn: Connection | None = None):
+def log_request(
+    uri: str,
+    environ: dict,
+    redirect_status: int,
+    conn: Connection | None = None,
+):
     """Do some logging work."""
     snipped = f"{uri[:100]}...snipped" if len(uri) > 100 else uri
     # See mod_wsgi discussion on this
@@ -37,10 +42,11 @@ def log_request(uri: str, environ: dict, conn: Connection | None = None):
     if remoteip_full.find(",") > 0:
         # Eh
         remoteip = remoteip.split(",")[0]
-    sys.stderr.write(
-        f"404 {snipped} remote: {remoteip_full} "
-        f"referer: {environ.get('HTTP_REFERER')}\n"
-    )
+    if redirect_status == 404:
+        sys.stderr.write(
+            f"404 {snipped} remote: {remoteip_full} "
+            f"referer: {environ.get('HTTP_REFERER')}\n"
+        )
     conn.execute(
         sql_helper(
             "INSERT into weblog(client_addr, uri, referer, http_status, "
@@ -51,7 +57,7 @@ def log_request(uri: str, environ: dict, conn: Connection | None = None):
             "addr": remoteip,
             "url": uri,
             "ref": environ.get("HTTP_REFERER"),
-            "status": 404,
+            "status": redirect_status,
             "xf": environ.get("HTTP_X_FORWARDED_FOR"),
             "domain": environ.get("HTTP_HOST"),
         },
@@ -61,6 +67,7 @@ def log_request(uri: str, environ: dict, conn: Connection | None = None):
 
 def application(environ, start_response):
     """mod-wsgi handler."""
+    redirect_status = int(environ.get("REDIRECT_STATUS", 404))
     http_host = environ.get("HTTP_HOST", "")
     is_iem = http_host in IEM_VHOSTS
     uri = environ.get("REQUEST_URI", "")
@@ -96,6 +103,18 @@ def application(environ, start_response):
             b"See https://mesonet.agron.iastate.edu/ogc/"
         ]
 
+    try:
+        log_request(uri, environ, redirect_status)
+    except Exception as exp:
+        sys.stderr.write(str(exp) + "\n")
+
+    # 405s are naughty requests, which we punt them away
+    if redirect_status == 405:
+        start_response(
+            "301 Moved Permanently", [("Location", "https://localhost")]
+        )
+        return [b"Moved Permanently"]
+
     # We should re-assert the HTTP status code that brought us here :/
     start_response("404 Not Found", [("Content-type", "text/html")])
     content = (
@@ -103,10 +122,6 @@ def application(environ, start_response):
         f'<img src="{COWIMG}" class="img img-responsive" alt="404 Cow" />'
     )
     ctx = {"title": "File Not Found (404)", "content": content}
-    try:
-        log_request(uri, environ)
-    except Exception as exp:
-        sys.stderr.write(str(exp) + "\n")
 
     if is_iem:
         return [TEMPLATE.render(ctx).encode("utf-8")]
