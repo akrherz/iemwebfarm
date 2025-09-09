@@ -1,5 +1,6 @@
 """Our custom 404 handler."""
 
+import ipaddress
 import re
 import sys
 from datetime import datetime, timedelta, timezone
@@ -25,6 +26,60 @@ ARCHIVE_RE = re.compile(
 WMS_RE = re.compile("WMS", re.IGNORECASE)
 
 
+# Common junk tokens that sometimes appear in X-Forwarded-For
+_BAD_XFF_TOKENS = {
+    "unknown",
+    "null",
+    "none",
+    "-",
+    "true",
+    "false",
+    "yes",
+    "no",
+}
+
+
+def sanitize_x_forwarded_for(xff_value: str | None) -> str | None:
+    """Return the first valid IP string found in X-Forwarded-For, or None.
+
+    Handles common junk tokens, IPv4:port, and bracketed IPv6 forms.
+    """
+    if not xff_value:
+        return None
+
+    for raw in str(xff_value).split(","):
+        token = raw.strip()
+        if not token:
+            continue
+        if token.lower() in _BAD_XFF_TOKENS:
+            continue
+
+        ip_candidate = token
+
+        # IPv6 with brackets: [::1]:1234 or [::1]
+        if ip_candidate.startswith("[") and "]" in ip_candidate:
+            ip_candidate = ip_candidate.split("]", 1)[0].lstrip("[")
+
+        # IPv4:port -> remove trailing :port (avoid chopping IPv6)
+        if (
+            ":" in ip_candidate
+            and ip_candidate.count(":") == 1
+            and "." in ip_candidate
+        ):
+            ip_candidate = ip_candidate.split(":", 1)[0]
+
+        # Strip surrounding quotes/whitespace
+        ip_candidate = ip_candidate.strip().strip("'\"")
+
+        try:
+            ipaddress.ip_address(ip_candidate)
+            return ip_candidate
+        except ValueError:
+            continue
+
+    return None
+
+
 @with_sqlalchemy_conn("mesosite")
 def log_request(
     uri: str,
@@ -35,13 +90,14 @@ def log_request(
     """Do some logging work."""
     snipped = f"{uri[:100]}...snipped" if len(uri) > 100 else uri
     # See mod_wsgi discussion on this
-    remoteip_full = environ.get(
-        "HTTP_X_FORWARDED_FOR", environ.get("REMOTE_ADDR")
+    remoteip_full = environ.get("HTTP_X_FORWARDED_FOR") or environ.get(
+        "REMOTE_ADDR"
     )
-    remoteip = remoteip_full
-    if remoteip_full.find(",") > 0:
-        # Eh
-        remoteip = remoteip.split(",")[0]
+    # Derive a sanitized IP from X-Forwarded-For when possible, otherwise fall
+    # back to the server-provided REMOTE_ADDR value.
+    remoteip = sanitize_x_forwarded_for(remoteip_full) or environ.get(
+        "REMOTE_ADDR"
+    )
     if redirect_status == 404:
         sys.stderr.write(
             f"404 {snipped} remote: {remoteip_full} "
