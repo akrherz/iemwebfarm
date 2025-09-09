@@ -65,7 +65,7 @@ def log_request(
     conn.commit()
 
 
-def application(environ, start_response):
+def application(environ: dict, start_response):
     """mod-wsgi handler."""
     redirect_status = int(environ.get("REDIRECT_STATUS", 404))
     http_host = environ.get("HTTP_HOST", "")
