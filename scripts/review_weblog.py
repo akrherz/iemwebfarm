@@ -8,12 +8,11 @@ from io import StringIO
 
 import psycopg2
 
-THRESHOLD = 30
+# Increased from 30 as we now have a GHA workflow that will generate about
+# that many :(
+THRESHOLD = 40
 ISU_RE = re.compile(r"^(10.90|10.24|129.186|2610:130|140.90)")
-MOSAIC_RE = re.compile(
-    r"/archive/data/[0-9]{4}/[0-9]{2}/[0-9]{2}/"
-    r"GIS/uscomp/n0[rq]_[0-9]{12}.(png|wld)"
-)
+ARCHIVE_RE = re.compile(r"/archive/data/[0-9]{4}/[0-9]{2}/[0-9]{2}/")
 
 
 def logic(counts):
@@ -31,7 +30,7 @@ def logic(counts):
         msg = StringIO()
         for hit in hits:
             # Swallow this as it is noisy
-            if MOSAIC_RE.match(hit[2]):
+            if ARCHIVE_RE.match(hit[2]):
                 ignored += 1
                 continue
             if hit[2].startswith("/archive/data/"):
