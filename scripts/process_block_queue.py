@@ -36,9 +36,15 @@ def main(argv):
         # We need to escape the periods
         xff = row[1].replace(".", r"\.").split("/")[0]
         ss = f"# {datetime.now(timezone.utc).isoformat()}"
-        (bannedlines if row[2] else newlines).append(
-            f'SetEnvIf X-Forwarded-For "^{xff}$" BlockAccess=1  {ss}\n'
-        )
+        if row[2]:
+            # notice the aggressive match :/
+            bannedlines.append(
+                f'SetEnvIf X-Forwarded-For "{xff}" BlockAccess=1  {ss}\n'
+            )
+        else:
+            newlines.append(
+                f'SetEnvIf X-Forwarded-For "^{xff}$" BlockAccess=1  {ss}\n'
+            )
         cursor2 = pgconn.cursor()
         cursor2.execute(
             "DELETE from weblog_block_queue where ctid = %s", (row[0],)
