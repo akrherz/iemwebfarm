@@ -14,7 +14,7 @@ import sys
 def magic(zvol, snap_to_make, snap_to_delete):
     """East of the Rockies, Hello."""
     cmd = ["/usr/sbin/zfs", "snapshot", f"{zvol}@{snap_to_make}"]
-    subprocess.call(cmd)
+    subprocess.run(cmd)
     cmd = ["/usr/sbin/zfs", "destroy", f"{zvol}@{snap_to_delete}"]
     subprocess.Popen(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
 
