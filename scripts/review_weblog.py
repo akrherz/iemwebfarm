@@ -15,7 +15,7 @@ ISU_RE = re.compile(r"^(10.90|10.24|129.186|2610:130|140.90)")
 ARCHIVE_RE = re.compile(r"/archive/data/[0-9]{4}/[0-9]{2}/[0-9]{2}/")
 
 
-def logic(counts):
+def logic(counts: dict):
     """Should we or should we not, that is the question."""
     res = []
     for addr, hits in counts.items():
