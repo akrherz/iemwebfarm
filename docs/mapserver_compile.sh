@@ -1,8 +1,8 @@
-#conda create -n ms python=3.6 proj4=5.2.0 libpng=1.6.37 jpeg=9c freetype=2.10.0 giflib=5.1.7 cairo=1.16.0 libcurl=7.65.3 libxml2=2.9.10  harfbuzz=2.4.0 fribidi=1.0.5 zlib=1.2.11 geos=3.7.1 gdal=2.4.1
-# conda create -n ms python=3.6 proj4=5.2.0 libpng jpeg freetype giflib cairo libcurl libxml2  harfbuzz fribidi zlib geos gdal
-#export PATH=$PATH:/usr/pgsql-12/bin
-export PREFIX=/opt/miniconda3/envs/prod
+# Needs gcc/g++/cmake/swig provided by conda-forge, maybe
+# Needs older sysroot-linux=2.17
 
+export PREFIX=/opt/miniconda3/envs/prod
+# export LD_LIBRARY_PATH=/opt/miniconda3/envs/prod/lib:$LD_LIBRARY_PATH
 export PKG_CONFIG_LIBDIR=$PREFIX/lib
 
 # Note, mapserver-sample.conf goes to /etc/opt/ per 
@@ -29,7 +29,7 @@ cmake .. \
 -DJPEG_LIBRARY=$PREFIX/lib/libjpeg.so \
 -DJPEG_INCLUDE_DIR=$PREFIX/include \
 -DFREETYPE_LIBRARY=$PREFIX/lib/libfreetype.so \
--DFREETYPE_INCLUDE_DIR=$PREFIX/include \
+-DFREETYPE_INCLUDE_DIRS=$PREFIX/include \
 -DGIF_LIBRARY=$PREFIX/lib/libgif.so \
 -DGIF_INCLUDE_DIR=$PREFIX/include \
 -DCAIRO_LIBRARY=$PREFIX/lib/libcairo.so \
