@@ -167,7 +167,13 @@ def application(environ: dict, start_response):
     # 405s are naughty requests, which we punt them away
     if redirect_status == 405:
         start_response(
-            "301 Moved Permanently", [("Location", "http://localhost")]
+            "301 Moved Permanently",
+            [
+                (
+                    "Location",
+                    "https://iowamesonet.github.io/sorry/?mode=blocked",
+                )
+            ],
         )
         return [b"Moved Permanently"]
 
