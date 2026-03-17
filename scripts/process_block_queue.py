@@ -17,13 +17,20 @@ def main(argv):
     # Sleep some to prevent a DOS
     time.sleep(random.randint(1, 10))
     myname = argv[1]
-    pgconn = psycopg.connect(
-        dbname="mesosite",
-        host="iemdb-mesosite.local",
-        user="nobody",
-        connect_timeout=5,
-        gssencmode="disable",
-    )
+    try:
+        pgconn = psycopg.connect(
+            dbname="mesosite",
+            host="iemdb-mesosite.local",
+            user="nobody",
+            connect_timeout=5,
+            gssencmode="disable",
+            target_session_attrs="read-write",
+        )
+    except psycopg.OperationalError as exp:
+        # Less noise when things are in bad shape
+        if datetime.now(timezone.utc).minute % 10 == 0:
+            print(exp)
+        return
     cursor = pgconn.cursor()
     cursor.execute(
         "SELECT ctid, x_forwarded_for, banned from weblog_block_queue WHERE "
