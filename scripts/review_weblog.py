@@ -4,6 +4,7 @@ Run every minute, sigh.
 """
 
 import re
+import subprocess
 from io import StringIO
 
 import psycopg2
@@ -68,7 +69,7 @@ def main():
     cursor = pgconn.cursor()
     # Anticyclone is not behind a proxy, so we have to do tricks here :/
     cursor.execute(
-        "SELECT valid, coalesce(x_forwarded_for, client_addr::text), uri, "
+        "SELECT valid, client_addr, uri, "
         "referer, domain, http_status from weblog "
         "WHERE http_status in (404, 405) ORDER by valid ASC",
     )
@@ -89,13 +90,25 @@ def main():
     )
     for ip in logic(counts):
         for i in range(35, 45):
-            cursor.execute(
-                "INSERT into weblog_block_queue "
-                "(x_forwarded_for, target) VALUES(%s, %s)",
-                (ip, f"iemvs{i}-dc"),
-            )
-        if ip.find(",") > -1:
-            ip = ip.split(",")[-1].strip()
+            remote_host = f"iemvs{i}-dc.agron.iastate.edu"
+            try:
+                subprocess.run(
+                    [
+                        "/usr/bin/ssh",
+                        "-o",
+                        "BatchMode=yes",
+                        "-o",
+                        "ConnectTimeout=5",
+                        remote_host,
+                        (
+                            "/opt/miniconda3/envs/prod/bin/python "
+                            f"/opt/iemwebfarm/scripts/app_firewall.py add {ip}"
+                        ),
+                    ],
+                    check=True,
+                )
+            except subprocess.CalledProcessError:
+                continue
         cursor.execute(
             "INSERT into weblog_block_queue "
             "(client_addr, target) VALUES(%s, %s)",
