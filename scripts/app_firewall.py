@@ -2,6 +2,7 @@
 
 import os
 import subprocess
+import sys
 
 import click
 
@@ -83,5 +84,5 @@ if __name__ == "__main__":
     # Ensure we are not root
     if os.geteuid() == 0:
         click.secho("This script should not be run as root.", fg="red")
-        exit(1)
+        sys.exit(1)
     cli()

@@ -88,9 +88,16 @@ def main():
         "DELETE from weblog where valid <= %s",
         (valid,),
     )
+    cursor.close()
+    pgconn.commit()
+    pgconn.close()
+
+    remote_hosts = ["anticyclone.agron.iastate.edu"]
+    for i in range(35, 45):
+        remote_hosts.append(f"iemvs{i}-dc.agron.iastate.edu")
+
     for ip in logic(counts):
-        for i in range(35, 45):
-            remote_host = f"iemvs{i}-dc.agron.iastate.edu"
+        for remote_host in remote_hosts:
             try:
                 subprocess.run(
                     [
@@ -109,13 +116,6 @@ def main():
                 )
             except subprocess.CalledProcessError:
                 continue
-        cursor.execute(
-            "INSERT into weblog_block_queue "
-            "(client_addr, target) VALUES(%s, %s)",
-            (ip, "anticyclone"),
-        )
-    cursor.close()
-    pgconn.commit()
 
 
 if __name__ == "__main__":
