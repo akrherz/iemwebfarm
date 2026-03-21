@@ -8,6 +8,7 @@ import click
 
 TEXT_SOURCE = "/etc/httpd/conf.d/blocklist.txt"
 DBM_OUTPUT = "/etc/httpd/conf.d/blocklist.map"
+INTERACTIVE = sys.stdout.isatty()
 
 
 def rebuild_dbm():
@@ -19,7 +20,8 @@ def rebuild_dbm():
         )
         # Ensure Apache can read it
         os.chmod(DBM_OUTPUT, 0o644)
-        click.secho("Successfully rebuilt Apache DBM map.", fg="green")
+        if INTERACTIVE:
+            click.secho("Successfully rebuilt Apache DBM map.", fg="green")
     except Exception as e:
         click.secho(f"Error rebuilding DBM: {e}", fg="red")
 
@@ -43,7 +45,8 @@ def add(ip):
     with open(TEXT_SOURCE, "w") as f:
         f.write("\n".join(sorted(entries)) + "\n")
 
-    click.echo(f"Added {ip} to source list.")
+    if INTERACTIVE:
+        click.echo(f"Added {ip} to source list.")
     rebuild_dbm()
 
 
