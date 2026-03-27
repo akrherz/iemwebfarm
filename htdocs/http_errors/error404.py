@@ -4,7 +4,7 @@ import re
 import sys
 from datetime import datetime, timedelta, timezone
 
-from pyiem.database import sql_helper, with_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.templates.iem import TEMPLATE
 from pyiem.util import LOG, utc
 from sqlalchemy.engine import Connection
@@ -25,12 +25,11 @@ ARCHIVE_RE = re.compile(
 WMS_RE = re.compile("WMS", re.IGNORECASE)
 
 
-@with_sqlalchemy_conn("mesosite")
 def log_request(
+    conn: Connection,
     uri: str,
     environ: dict,
     redirect_status: int,
-    conn: Connection | None = None,
 ):
     """Do some logging work."""
     snipped = f"{uri[:100]}...snipped" if len(uri) > 100 else uri
@@ -38,8 +37,7 @@ def log_request(
     remoteip = environ.get("REMOTE_ADDR")
     if redirect_status == 404:
         sys.stderr.write(
-            f"404 {snipped} remote: {remoteip} "
-            f"referer: {environ.get('HTTP_REFERER')}\n"
+            f"404 {snipped} referer: {environ.get('HTTP_REFERER')}\n"
         )
     conn.execute(
         sql_helper(
@@ -65,10 +63,6 @@ def application(environ: dict, start_response):
     http_host = environ.get("HTTP_HOST", "")
     is_iem = http_host in IEM_VHOSTS
     uri = environ.get("REQUEST_URI", "")
-    # Special handling of ancient broken windrose behaviour
-    if uri.startswith("/onsite/windrose/climate"):
-        start_response("410 Gone", [("Content-type", "text/plain")])
-        return [b"Resource is no longer available."]
 
     # People requesting files from the future
     m = ARCHIVE_RE.match(uri)
@@ -98,7 +92,8 @@ def application(environ: dict, start_response):
         ]
 
     try:
-        log_request(uri, environ, redirect_status)
+        with get_sqlalchemy_conn("mesosite", rw=True) as conn:
+            log_request(conn, uri, environ, redirect_status)
     except Exception as exp:
         sys.stderr.write(str(exp) + "\n")
 
