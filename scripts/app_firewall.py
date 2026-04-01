@@ -15,8 +15,8 @@ def rebuild_dbm():
     """Compiles the text file into a DBM map for Apache."""
     try:
         # IMPORTANT, httxt2dbm upserts, so need to blow out the old
-        if os.path.exists(DBM_OUTPUT):
-            os.remove(DBM_OUTPUT)
+        with open(DBM_OUTPUT, "w") as fh:
+            fh.write("")
         subprocess.run(
             ["/usr/bin/httxt2dbm", "-i", TEXT_SOURCE, "-o", DBM_OUTPUT],
             check=True,
