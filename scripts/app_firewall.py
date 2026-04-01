@@ -42,6 +42,8 @@ def set_ip(ip: str, newval: str) -> bool:
                 new_lines.append(f"{ip} {newval}\n")
             else:
                 new_lines.append(line)
+    if not found:
+        new_lines.append(f"{ip} {newval}\n")
     with open(TEXT_SOURCE, "w") as f:
         f.writelines(new_lines)
     return found
