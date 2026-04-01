@@ -3,6 +3,7 @@
 import os
 import subprocess
 import sys
+from datetime import datetime, timezone
 
 import click
 
@@ -14,15 +15,11 @@ INTERACTIVE = sys.stdout.isatty()
 def rebuild_dbm():
     """Compiles the text file into a DBM map for Apache."""
     try:
-        # IMPORTANT, httxt2dbm upserts, so need to write a temp file and then
-        # overwrite the old.
-        tmpfn = "/tmp/blocklist.txt"
+        # IMPORTANT, httxt2dbm upserts
         subprocess.run(
-            ["/usr/bin/httxt2dbm", "-i", TEXT_SOURCE, "-o", tmpfn],
+            ["/usr/bin/httxt2dbm", "-i", TEXT_SOURCE, "-o", DBM_OUTPUT],
             check=True,
         )
-        # Move the temp file to the final destination
-        subprocess.run(["/usr/bin/mv", tmpfn, DBM_OUTPUT], check=True)
         # Ensure Apache can read it
         os.chmod(DBM_OUTPUT, 0o644)
         if INTERACTIVE:
@@ -66,15 +63,23 @@ def remove(ip):
     with open(TEXT_SOURCE, "r") as f:
         lines = f.readlines()
 
-    # Filter out the IP
-    new_lines = [line for line in lines if not line.startswith(f"{ip} ")]
+    utcnow = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    # Replace the entry with a timestamp, for future garbage collection
+    new_lines = []
+    found = False
+    for line in lines:
+        if line.strip() == f"{ip} BAD":
+            found = True
+            new_lines.append(f"{ip} {utcnow}")
+        else:
+            new_lines.append(line)
 
-    if len(lines) == len(new_lines):
+    if not found:
         click.echo(f"IP {ip} was not found in the list.")
     else:
         with open(TEXT_SOURCE, "w") as f:
             f.writelines(new_lines)
-        click.echo(f"Removed {ip} from source list.")
+        click.echo(f"Reset {ip} in blocklist.")
         rebuild_dbm()
 
 
