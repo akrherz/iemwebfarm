@@ -28,6 +28,25 @@ def rebuild_dbm():
         click.secho(f"Error rebuilding DBM: {e}", fg="red")
 
 
+def set_ip(ip: str, newval: str) -> bool:
+    """Update or insert the text file with the new entry."""
+    new_lines = []
+    found = False
+    if os.path.isfile(TEXT_SOURCE):
+        with open(TEXT_SOURCE, "r") as f:
+            # retains line endings...
+            old_lines = f.readlines()
+        for line in old_lines:
+            if line.startswith(f"{ip} "):
+                found = True
+                new_lines.append(f"{ip} {newval}\n")
+            else:
+                new_lines.append(line)
+    with open(TEXT_SOURCE, "w") as f:
+        f.writelines(new_lines)
+    return found
+
+
 @click.group()
 def cli():
     """IEM Application Firewall Manager"""
@@ -35,17 +54,9 @@ def cli():
 
 @cli.command()
 @click.argument("ip")
-def add(ip):
+def block(ip):
     """Add an IP to the blocklist."""
-    entries = set()
-    if os.path.exists(TEXT_SOURCE):
-        with open(TEXT_SOURCE, "r") as f:
-            entries = {line.strip() for line in f if line.strip()}
-
-    entries.add(f"{ip} BAD")
-
-    with open(TEXT_SOURCE, "w") as f:
-        f.write("\n".join(sorted(entries)) + "\n")
+    set_ip(ip, "BAD")
 
     if INTERACTIVE:
         click.echo(f"Added {ip} to source list.")
@@ -54,31 +65,14 @@ def add(ip):
 
 @cli.command()
 @click.argument("ip")
-def remove(ip):
+def unblock(ip):
     """Remove an IP from the blocklist."""
-    if not os.path.exists(TEXT_SOURCE):
-        click.echo("Source file does not exist.")
-        return
-
-    with open(TEXT_SOURCE, "r") as f:
-        lines = f.readlines()
-
     utcnow = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    # Replace the entry with a timestamp, for future garbage collection
-    new_lines = []
-    found = False
-    for line in lines:
-        if line.strip() == f"{ip} BAD":
-            found = True
-            new_lines.append(f"{ip} {utcnow}")
-        else:
-            new_lines.append(line)
+    found = set_ip(ip, utcnow)
 
     if not found:
         click.echo(f"IP {ip} was not found in the list.")
     else:
-        with open(TEXT_SOURCE, "w") as f:
-            f.writelines(new_lines)
         click.echo(f"Reset {ip} in blocklist.")
         rebuild_dbm()
 
