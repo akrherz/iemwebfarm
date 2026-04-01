@@ -3,7 +3,6 @@
 import os
 import subprocess
 import sys
-import tempfile
 
 import click
 
@@ -17,13 +16,13 @@ def rebuild_dbm():
     try:
         # IMPORTANT, httxt2dbm upserts, so need to write a temp file and then
         # overwrite the old.
-        with tempfile.NamedTemporaryFile(delete=False) as tmp:
-            subprocess.run(
-                ["/usr/bin/httxt2dbm", "-i", TEXT_SOURCE, "-o", tmp.name],
-                check=True,
-            )
+        tmpfn = "/tmp/blocklist.txt"
+        subprocess.run(
+            ["/usr/bin/httxt2dbm", "-i", TEXT_SOURCE, "-o", tmpfn],
+            check=True,
+        )
         # Move the temp file to the final destination
-        os.replace(tmp.name, DBM_OUTPUT)
+        os.replace(tmpfn, DBM_OUTPUT)
         # Ensure Apache can read it
         os.chmod(DBM_OUTPUT, 0o644)
         if INTERACTIVE:
