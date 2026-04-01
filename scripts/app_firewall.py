@@ -22,7 +22,7 @@ def rebuild_dbm():
             check=True,
         )
         # Move the temp file to the final destination
-        os.replace(tmpfn, DBM_OUTPUT)
+        subprocess.run(["/usr/bin/mv", tmpfn, DBM_OUTPUT], check=True)
         # Ensure Apache can read it
         os.chmod(DBM_OUTPUT, 0o644)
         if INTERACTIVE:
