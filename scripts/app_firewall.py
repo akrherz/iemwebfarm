@@ -3,6 +3,7 @@
 import os
 import subprocess
 import sys
+from datetime import datetime, timezone
 
 import click
 
@@ -14,21 +15,36 @@ INTERACTIVE = sys.stdout.isatty()
 def rebuild_dbm():
     """Compiles the text file into a DBM map for Apache."""
     try:
-        # IMPORTANT, httxt2dbm upserts, so need to write a temp file and then
-        # overwrite the old.
-        tmpfn = "/tmp/blocklist.txt"
+        # IMPORTANT, httxt2dbm upserts
         subprocess.run(
-            ["/usr/bin/httxt2dbm", "-i", TEXT_SOURCE, "-o", tmpfn],
+            ["/usr/bin/httxt2dbm", "-i", TEXT_SOURCE, "-o", DBM_OUTPUT],
             check=True,
         )
-        # Move the temp file to the final destination
-        subprocess.run(["/usr/bin/mv", tmpfn, DBM_OUTPUT], check=True)
         # Ensure Apache can read it
         os.chmod(DBM_OUTPUT, 0o644)
         if INTERACTIVE:
             click.secho("Successfully rebuilt Apache DBM map.", fg="green")
     except Exception as e:
         click.secho(f"Error rebuilding DBM: {e}", fg="red")
+
+
+def set_ip(ip: str, newval: str) -> bool:
+    """Update or insert the text file with the new entry."""
+    new_lines = []
+    found = False
+    if os.path.isfile(TEXT_SOURCE):
+        with open(TEXT_SOURCE, "r") as f:
+            # retains line endings...
+            old_lines = f.readlines()
+        for line in old_lines:
+            if line.startswith(f"{ip} "):
+                found = True
+                new_lines.append(f"{ip} {newval}\n")
+            else:
+                new_lines.append(line)
+    with open(TEXT_SOURCE, "w") as f:
+        f.writelines(new_lines)
+    return found
 
 
 @click.group()
@@ -38,17 +54,9 @@ def cli():
 
 @cli.command()
 @click.argument("ip")
-def add(ip):
+def block(ip):
     """Add an IP to the blocklist."""
-    entries = set()
-    if os.path.exists(TEXT_SOURCE):
-        with open(TEXT_SOURCE, "r") as f:
-            entries = {line.strip() for line in f if line.strip()}
-
-    entries.add(f"{ip} BAD")
-
-    with open(TEXT_SOURCE, "w") as f:
-        f.write("\n".join(sorted(entries)) + "\n")
+    set_ip(ip, "BAD")
 
     if INTERACTIVE:
         click.echo(f"Added {ip} to source list.")
@@ -57,24 +65,15 @@ def add(ip):
 
 @cli.command()
 @click.argument("ip")
-def remove(ip):
+def unblock(ip):
     """Remove an IP from the blocklist."""
-    if not os.path.exists(TEXT_SOURCE):
-        click.echo("Source file does not exist.")
-        return
+    utcnow = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    found = set_ip(ip, utcnow)
 
-    with open(TEXT_SOURCE, "r") as f:
-        lines = f.readlines()
-
-    # Filter out the IP
-    new_lines = [line for line in lines if not line.startswith(f"{ip} ")]
-
-    if len(lines) == len(new_lines):
+    if not found:
         click.echo(f"IP {ip} was not found in the list.")
     else:
-        with open(TEXT_SOURCE, "w") as f:
-            f.writelines(new_lines)
-        click.echo(f"Removed {ip} from source list.")
+        click.echo(f"Reset {ip} in blocklist.")
         rebuild_dbm()
 
 
