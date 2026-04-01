@@ -6,8 +6,8 @@ import sys
 
 import click
 
-TEXT_SOURCE = "/etc/httpd/conf.d/blocklist.txt"
-DBM_OUTPUT = "/etc/httpd/conf.d/blocklist.map"
+TEXT_SOURCE = "/mesonet/blocklist.txt"
+DBM_OUTPUT = "/mesonet/blocklist.map"
 INTERACTIVE = sys.stdout.isatty()
 
 
