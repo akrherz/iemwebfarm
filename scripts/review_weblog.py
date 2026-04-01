@@ -109,7 +109,8 @@ def main():
                         remote_host,
                         (
                             "/opt/miniconda3/envs/prod/bin/python "
-                            f"/opt/iemwebfarm/scripts/app_firewall.py add {ip}"
+                            f"/opt/iemwebfarm/scripts/app_firewall.py "
+                            f"block {ip}"
                         ),
                     ],
                     check=True,
