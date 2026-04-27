@@ -64,6 +64,14 @@ def application(environ: dict, start_response):
     is_iem = http_host in IEM_VHOSTS
     uri = environ.get("REQUEST_URI", "")
 
+    # Bad WMS requests
+    if WMS_RE.search(uri):
+        start_response("400 Bad Request", [("Content-type", "text/plain")])
+        return [
+            b"This WMS url is invalid. "
+            b"See https://mesonet.agron.iastate.edu/ogc/"
+        ]
+
     # People requesting files from the future
     m = ARCHIVE_RE.match(uri)
     if m:
@@ -82,20 +90,12 @@ def application(environ: dict, start_response):
                 b"Please adjust your script to not request files "
                 b"from the future."
             ]
-
-    # Bad WMS requests
-    if WMS_RE.search(uri):
-        start_response("400 Bad Request", [("Content-type", "text/plain")])
-        return [
-            b"This WMS url is invalid. "
-            b"See https://mesonet.agron.iastate.edu/ogc/"
-        ]
-
-    try:
-        with get_sqlalchemy_conn("mesosite", rw=True) as conn:
-            log_request(conn, uri, environ, redirect_status)
-    except Exception as exp:
-        sys.stderr.write(str(exp) + "\n")
+    else:
+        try:
+            with get_sqlalchemy_conn("mesosite", rw=True) as conn:
+                log_request(conn, uri, environ, redirect_status)
+        except Exception as exp:
+            sys.stderr.write(str(exp) + "\n")
 
     # 405s are naughty requests, which we punt them away
     if redirect_status == 405:
