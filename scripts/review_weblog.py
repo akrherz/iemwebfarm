@@ -39,7 +39,7 @@ def logic(counts: dict):
                 dq += 1
         if ignored == len(hits):
             continue
-        do_block = (len(hits) - dq) >= THRESHOLD
+        do_block = dq > 120 or (len(hits) - dq) >= THRESHOLD
         msg.write(f"{addr} with {len(hits)}[{dq} DQ]/{THRESHOLD} 404s\n\n")
         for hit in hits[:10]:
             # Short circuit things
