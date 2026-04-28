@@ -2,7 +2,7 @@
 
 import re
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.templates.iem import TEMPLATE
@@ -19,6 +19,7 @@ IEM_VHOSTS = [
     "mesonet4.agron.iastate.edu",
 ]
 COWIMG = "https://mesonet.agron.iastate.edu/images/cow404.jpg"
+ARCHIVE_BASE_RE = re.compile(r"^/archive/data/(\d{4})/(\d{2})/(\d{2})/")
 ARCHIVE_RE = re.compile(
     r"^/archive/data/(\d{4})/(\d{2})/(\d{2})/(.*)_(\d{8})_?(\d{2,4})"
 )
@@ -72,24 +73,28 @@ def application(environ: dict, start_response):
             b"See https://mesonet.agron.iastate.edu/ogc/"
         ]
 
-    # People requesting files from the future
-    m = ARCHIVE_RE.match(uri)
-    if m:
-        try:
-            tstr = m.group(5) + m.group(6)
-            fmt = "%Y%m%d%H%M" if len(tstr) == 12 else "%Y%m%d%H"
-            ts = datetime.strptime(tstr, fmt).replace(tzinfo=timezone.utc)
-        except Exception as exp:
-            LOG.error(exp)
-            ts = utc() - timedelta(days=1)
-        if ts > utc():
-            start_response(
-                "422 Unprocessable entity", [("Content-type", "text/plain")]
-            )
-            return [
-                b"Please adjust your script to not request files "
-                b"from the future."
-            ]
+    # A specialized check for archive requests and attempt to help the
+    # user out when they request files from the future.
+    base_match = ARCHIVE_BASE_RE.match(uri)
+    if base_match:
+        m = ARCHIVE_RE.match(uri)
+        if m:
+            ts = None
+            try:
+                tstr = m.group(5) + m.group(6)
+                fmt = "%Y%m%d%H%M" if len(tstr) == 12 else "%Y%m%d%H"
+                ts = datetime.strptime(tstr, fmt).replace(tzinfo=timezone.utc)
+            except Exception as exp:
+                LOG.error(exp)
+            if ts is not None and ts > utc():
+                start_response(
+                    "422 Unprocessable entity",
+                    [("Content-type", "text/plain")],
+                )
+                return [
+                    b"Please adjust your script to not request files "
+                    b"from the future."
+                ]
     else:
         try:
             with get_sqlalchemy_conn("mesosite", rw=True) as conn:
