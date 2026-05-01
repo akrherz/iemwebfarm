@@ -1,4 +1,8 @@
-"""Invoked at mod-wsgi startup to get certain libraries loaded!"""
+"""mod_wsgi startup script.
+
+Runs at mod_wsgi worker startup so to have expensive libraries to load loaded
+and needed configurations set.
+"""
 
 import os
 import sys
@@ -22,8 +26,11 @@ for repo in ["iem", "depbackend", "weather.im"]:
 
 # Forces Agg backend usage
 from pyiem.plot.use_agg import figure  # noqa
-from pyiem.util import LOG  # noqa
+from pyiem.util import logger  # noqa
 import pandas as pd  # noqa
+
+# Set up the logging config from pyim
+_ = logger()
 
 
 # https://stackoverflow.com/questions/22373927/get-traceback-of-warnings
