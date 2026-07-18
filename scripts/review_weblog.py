@@ -44,7 +44,7 @@ def should_block(addr: str, hits: list[tuple]) -> bool:
         # but now is this request worth logging
         if "scnr_engine" in uri or uri.startswith("/.") or hit[5] == 405:
             continue
-        if bad_requests < 10:
+        if i < 10:
             msg.write(f"{hit[0]} uri:|{uri}| ref:|{hit[3]}| dom:|{hit[4]}|\n")
 
     # Now we evaluate
@@ -92,10 +92,6 @@ def build_counts() -> dict[str, list[tuple]]:
 
 def main():
     """Go Main Go."""
-    remote_hosts = ["anticyclone.agron.iastate.edu"]
-    for i in range(35, 45):
-        remote_hosts.append(f"iemvs{i}-dc.agron.iastate.edu")
-
     counts = build_counts()
 
     for ip, hits in counts.items():
