@@ -16,49 +16,47 @@ ISU_RE = re.compile(r"^(10.90|10.24|129.186|2610:130|140.90)")
 ARCHIVE_RE = re.compile(r"/archive/data/[0-9]{4}/[0-9]{2}/[0-9]{2}/")
 
 
-def logic(counts: dict):
+def should_block(addr: str, hits: list[tuple]) -> bool:
     """Should we or should we not, that is the question."""
-    res = []
-    for addr, hits in counts.items():
-        # Ensure if the first localhost is possible, but alas
-        if len(hits) < THRESHOLD or addr in ("127.0.0.1", "127.0.0.1/32"):
+    # Ensure if the first localhost is possible, but alas
+    if len(hits) < THRESHOLD or addr in ("127.0.0.1", "127.0.0.1/32"):
+        return False
+    if ISU_RE.match(addr) is not None:
+        print(f"DQ {addr}")
+        return False
+    # Now we evaluate if this IP should get blocked and if the hits
+    # are interesting enough to email to the developer to review
+    bad_requests = 0
+    # We have a higher tolerance for these, but we only have so much
+    provisional_requests = 0
+    msg = StringIO()
+    msg.write(f"{addr} with {len(hits)} bad requests\n\n")
+    for i, hit in enumerate(hits):
+        uri: str = hit[2]
+        # Swallow this as it is noisy
+        if ARCHIVE_RE.match(uri):
             continue
-        if ISU_RE.match(addr) is not None:
-            print(f"DQ {addr}")
+        if uri.startswith("/archive/data/"):
+            provisional_requests += 1
             continue
-        # Swallow non-naughty things.
-        dq = 0
-        ignored = 0
-        msg = StringIO()
-        for hit in hits:
-            # Swallow this as it is noisy
-            if ARCHIVE_RE.match(hit[2]):
-                ignored += 1
-                continue
-            if hit[2].startswith("/archive/data/"):
-                dq += 1
-        if ignored == len(hits):
+        # OK, we have determined this one was bad
+        bad_requests += 1
+        # but now is this request worth logging
+        if "scnr_engine" in uri or uri.startswith("/.") or hit[5] == 405:
             continue
-        do_block = dq > 120 or (len(hits) - dq) >= THRESHOLD
-        msg.write(f"{addr} with {len(hits)}[{dq} DQ]/{THRESHOLD} 404s\n\n")
-        for hit in hits[:10]:
-            # Short circuit things
-            if hit[5] == 405:
-                msg.write(" scnr_engine\n")
-            msg.write(
-                f"{hit[0]} uri:|{hit[2]}| ref:|{hit[3]}| dom:|{hit[4]}|\n"
-            )
-        payload = msg.getvalue()
-        # Too noisy
-        if payload.find("scnr_engine") == -1:
-            print(payload)
-        if do_block:
-            res.append(addr)
-    return res
+        if bad_requests < 10:
+            msg.write(f"{hit[0]} uri:|{uri}| ref:|{hit[3]}| dom:|{hit[4]}|\n")
+
+    # Now we evaluate
+    if bad_requests < THRESHOLD:
+        return False
+
+    print(msg.getvalue())
+    return True
 
 
-def main():
-    """Go Main Go."""
+def build_counts() -> dict[str, list[tuple]]:
+    """See what the database holds"""
     pgconn = psycopg2.connect(
         database="mesosite",
         host="iemdb-mesosite.local",
@@ -67,7 +65,6 @@ def main():
         gssencmode="disable",
     )
     cursor = pgconn.cursor()
-    # Anticyclone is not behind a proxy, so we have to do tricks here :/
     cursor.execute(
         "SELECT valid, client_addr, uri, "
         "referer, domain, http_status from weblog "
@@ -82,41 +79,40 @@ def main():
         d.append(row)
         valid = row[0]
 
-    if valid is None:
-        return
-    cursor.execute(
-        "DELETE from weblog where valid <= %s",
-        (valid,),
-    )
-    cursor.close()
-    pgconn.commit()
+    if valid is not None:
+        cursor.execute(
+            "DELETE from weblog where valid <= %s",
+            (valid,),
+        )
+        cursor.close()
+        pgconn.commit()
     pgconn.close()
+    return counts
 
+
+def main():
+    """Go Main Go."""
     remote_hosts = ["anticyclone.agron.iastate.edu"]
     for i in range(35, 45):
         remote_hosts.append(f"iemvs{i}-dc.agron.iastate.edu")
 
-    for ip in logic(counts):
-        for remote_host in remote_hosts:
-            try:
-                subprocess.run(
-                    [
-                        "/usr/bin/ssh",
-                        "-o",
-                        "BatchMode=yes",
-                        "-o",
-                        "ConnectTimeout=5",
-                        remote_host,
-                        (
-                            "/opt/miniconda3/envs/prod/bin/python "
-                            f"/opt/iemwebfarm/scripts/app_firewall.py "
-                            f"block {ip}"
-                        ),
-                    ],
-                    check=True,
-                )
-            except subprocess.CalledProcessError:
-                continue
+    counts = build_counts()
+
+    for ip, hits in counts.items():
+        if not should_block(ip, hits):
+            continue
+        try:
+            subprocess.run(
+                [
+                    "/usr/bin/bash",
+                    "/opt/iemwebfarm/scripts/block.sh",
+                    "block",
+                    ip,
+                ],
+                check=True,
+            )
+        except subprocess.CalledProcessError:
+            continue
 
 
 if __name__ == "__main__":
