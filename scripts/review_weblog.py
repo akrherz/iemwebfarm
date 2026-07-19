@@ -28,8 +28,9 @@ def should_block(addr: str, hits: list[tuple]) -> bool:
     bad_requests = 0
     # We have a higher tolerance for these, but we only have so much
     provisional_requests = 0
-    messages = []
-    messages.append(f"{addr} with {len(hits)} bad requests")
+    messages = [
+        f"{addr} with {len(hits)} bad requests",
+    ]
     for i, hit in enumerate(hits):
         uri: str = hit[2]
         # Swallow this as it is noisy
