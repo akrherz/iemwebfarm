@@ -5,7 +5,6 @@ Run every minute, sigh.
 
 import re
 import subprocess
-from io import StringIO
 
 import psycopg2
 
@@ -29,8 +28,8 @@ def should_block(addr: str, hits: list[tuple]) -> bool:
     bad_requests = 0
     # We have a higher tolerance for these, but we only have so much
     provisional_requests = 0
-    msg = StringIO()
-    msg.write(f"{addr} with {len(hits)} bad requests\n\n")
+    messages = []
+    messages.append(f"{addr} with {len(hits)} bad requests")
     for i, hit in enumerate(hits):
         uri: str = hit[2]
         # Swallow this as it is noisy
@@ -45,13 +44,15 @@ def should_block(addr: str, hits: list[tuple]) -> bool:
         if "scnr_engine" in uri or uri.startswith("/.") or hit[5] == 405:
             continue
         if i < 10:
-            msg.write(f"{hit[0]} uri:|{uri}| ref:|{hit[3]}| dom:|{hit[4]}|\n")
+            messages.append(
+                f"{hit[0]} uri:|{uri}| ref:|{hit[3]}| dom:|{hit[4]}|"
+            )
 
     # Now we evaluate
     if bad_requests < THRESHOLD:
         return False
-
-    print(msg.getvalue())
+    if len(messages) > 9:
+        print("\n".join(messages) + "\n\n")
     return True
 
 
