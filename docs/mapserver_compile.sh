@@ -5,7 +5,7 @@ export PREFIX=/opt/miniconda3/envs/prod
 # export LD_LIBRARY_PATH=/opt/miniconda3/envs/prod/lib:$LD_LIBRARY_PATH
 export PKG_CONFIG_LIBDIR=$PREFIX/lib
 
-# Note, mapserver-sample.conf goes to /etc/opt/ per 
+# Note, mapserver-sample.conf goes to /etc/opt/ per
 # https://cmake.org/cmake/help/latest/module/GNUInstallDirs.html
 cmake .. \
 -DBUILD_FUZZER_REPRODUCER=OFF \
@@ -50,4 +50,3 @@ cmake .. \
 -DGDAL_INCLUDE_DIR=$PREFIX/include \
 -DPostgreSQL_LIBRARY=$PREFIX/lib/libpq.so \
 -DPostgreSQL_INCLUDE_DIR=$PREFIX/include
-
