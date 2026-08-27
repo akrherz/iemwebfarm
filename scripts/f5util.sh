@@ -1,3 +1,4 @@
+#!/bin/bash
 # Our present method to remove a webfarm node from the F5 pool
 
 rm -f /var/www/html/index.php >& /dev/null
