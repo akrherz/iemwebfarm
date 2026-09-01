@@ -41,6 +41,10 @@ def should_block(addr: str, hits: list[tuple]) -> bool:
             continue
         # OK, we have determined this one was bad
         bad_requests += 1
+        # We penalize this one a lot and don't wish to see it denoted
+        if uri.startswith(("http:", "https:")):
+            bad_requests += 5
+            continue
         # but now is this request worth logging
         if "scnr_engine" in uri or uri.startswith("/.") or hit[5] == 405:
             continue
