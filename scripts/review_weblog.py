@@ -36,7 +36,7 @@ def should_block(addr: str, hits: list[tuple]) -> bool:
         # Swallow this as it is noisy
         if ARCHIVE_RE.match(uri):
             continue
-        if uri.startswith("/archive/data/"):
+        if uri.startswith(("/archive/data/", "/archive/raw/")):
             provisional_requests += 1
             continue
         # OK, we have determined this one was bad
@@ -54,7 +54,7 @@ def should_block(addr: str, hits: list[tuple]) -> bool:
             )
 
     # Now we evaluate
-    if bad_requests < THRESHOLD:
+    if max(bad_requests, provisional_requests) < THRESHOLD:
         return False
     if len(messages) > 9:
         print("\n".join(messages) + "\n\n")
