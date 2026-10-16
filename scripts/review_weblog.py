@@ -33,6 +33,7 @@ def should_block(addr: str, hits: list[tuple]) -> bool:
     ]
     for i, hit in enumerate(hits):
         uri: str = hit[2]
+        referer: str = hit[3]
         # Swallow this as it is noisy
         if ARCHIVE_RE.match(uri):
             continue
@@ -48,16 +49,17 @@ def should_block(addr: str, hits: list[tuple]) -> bool:
         # but now is this request worth logging
         if "scnr_engine" in uri or uri.startswith("/.") or hit[5] == 405:
             continue
-        if i < 10:
+        # Require some referer to again cut down on emailed noise
+        if referer:
             messages.append(
-                f"{hit[0]} uri:|{uri}| ref:|{hit[3]}| dom:|{hit[4]}|"
+                f"{hit[0]} uri:|{uri}| ref:|{referer}| dom:|{hit[4]}|"
             )
 
     # Now we evaluate
     if max(bad_requests, provisional_requests) < THRESHOLD:
         return False
     if len(messages) > 9:
-        print("\n".join(messages) + "\n\n")
+        print("\n".join(messages[:10]) + "\n\n")
     return True
 
 
