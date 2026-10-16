@@ -31,7 +31,7 @@ def should_block(addr: str, hits: list[tuple]) -> bool:
     messages = [
         f"{addr} with {len(hits)} bad requests",
     ]
-    for i, hit in enumerate(hits):
+    for hit in hits:
         uri: str = hit[2]
         referer: str = hit[3]
         # Swallow this as it is noisy
