@@ -11,7 +11,7 @@ import psycopg2
 # Increased from 30 as we now have a GHA workflow that will generate about
 # that many :(
 THRESHOLD = 40
-ISU_RE = re.compile(r"^(10.90|10.24|129.186|2610:130|140.90)")
+ISU_RE = re.compile(r"^(10.90|10.24|129.186|2610:130|140.90|212.227.240.181)")
 ARCHIVE_RE = re.compile(r"/archive/data/[0-9]{4}/[0-9]{2}/[0-9]{2}/")
 
 
