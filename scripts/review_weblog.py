@@ -21,7 +21,6 @@ def should_block(addr: str, hits: list[tuple]) -> bool:
     if len(hits) < THRESHOLD or addr in ("127.0.0.1", "127.0.0.1/32"):
         return False
     if ISU_RE.match(addr) is not None:
-        print(f"DQ {addr}")
         return False
     # Now we evaluate if this IP should get blocked and if the hits
     # are interesting enough to email to the developer to review
