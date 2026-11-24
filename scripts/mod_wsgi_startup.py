@@ -5,9 +5,21 @@ and needed configurations set.
 """
 
 import os
+import socket
 import sys
 import traceback
 import warnings
+
+import urllib3.util.connection as urllib3_cn
+
+
+# Force IPv4 for requests until brokenness goes away
+def allowed_gai_family():
+    return socket.AF_INET
+
+
+urllib3_cn.allowed_gai_family = allowed_gai_family
+
 
 # These need set before importing matplotlib
 envpath = "/opt/miniconda3/envs/prod"
